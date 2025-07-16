@@ -518,11 +518,15 @@ function formatIndianNumber(num) {
     
     // Process from right to left
     for (let i = numStr.length - 1; i >= 0; i--) {
-        if (count > 0 && count % 2 === 0 && count !== 2) {
-            result = ',' + result;
-        } else if (count === 3) {
+        // Add comma after every 3 digits for the first group (thousands)
+        if (count === 3) {
             result = ',' + result;
         }
+        // Add comma after every 2 digits for subsequent groups (lakhs, crores, etc.)
+        else if (count > 3 && (count - 3) % 2 === 0) {
+            result = ',' + result;
+        }
+        
         result = numStr[i] + result;
         count++;
     }

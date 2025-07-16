@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMP Salary Board</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">
+                    <span class="material-icons">account_balance</span>
+                    SMP Salary Board
+                </h1>
+                <nav class="nav">
+                    <button id="dashboardBtn" class="nav-btn active">
+                        <span class="material-icons">dashboard</span>
+                        Dashboard
+                    </button>
+                    <button id="loginBtn" class="nav-btn">
+                        <span class="material-icons">person</span>
+                        Employee Login
+                    </button>
+                    <button id="themeToggle" class="theme-toggle">
+                        <span class="material-icons">brightness_6</span>
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard View -->
+            <div id="dashboardView" class="view active">
+                <div class="page-header">
+                    <h2>Salary Dashboard</h2>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card total-employees">
+                        <div class="stat-icon">
+                            <span class="material-icons">group</span>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalEmployees">0</h3>
+                            <p>Total Employees</p>
+                        </div>
+                    </div>
+                    <div class="stat-card total-gross">
+                        <div class="stat-icon">
+                            <span class="material-icons">monetization_on</span>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalGross">₹0</h3>
+                            <p>Total Gross Salary</p>
+                        </div>
+                    </div>
+                    <div class="stat-card total-deductions">
+                        <div class="stat-icon">
+                            <span class="material-icons">remove_circle</span>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalDeductions">₹0</h3>
+                            <p>Total Deductions</p>
+                        </div>
+                    </div>
+                    <div class="stat-card total-net">
+                        <div class="stat-icon">
+                            <span class="material-icons">account_balance_wallet</span>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalNet">₹0</h3>
+                            <p>Total Net Salary</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Year & Month-wise Salary Summary</h3>
+                        <div class="table-actions">
+                            <div class="filter-group">
+                                <label for="yearFilter">Year:</label>
+                                <select id="yearFilter">
+                                    <option value="">All Years</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="monthFilter">Month:</label>
+                                <select id="monthFilter">
+                                    <option value="">All Months</option>
+                                </select>
+                            </div>
+                            <button id="clearFilters" class="btn-secondary">
+                                <span class="material-icons">clear</span>
+                                Clear Filters
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper scrollable">
+                        <table id="summaryTable">
+                            <thead>
+                                <tr>
+                                    <th>Year</th>
+                                    <th>Month</th>
+                                    <th>Total Basic</th>
+                                    <th>Total DA</th>
+                                    <th>Total HRA</th>
+                                    <th>Total Gross</th>
+                                    <th>Total Deductions</th>
+                                    <th>Total Net</th>
+                                </tr>
+                            </thead>
+                            <tbody id="summaryTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employee Login View -->
+            <div id="loginView" class="view">
+                <div class="login-container">
+                    <div class="login-card">
+                        <div class="login-header">
+                            <span class="material-icons">person</span>
+                            <h2>Employee Login</h2>
+                            <p>Enter your Employee ID to view salary details</p>
+                        </div>
+                        <form id="loginForm">
+                            <div class="form-group">
+                                <label for="empId">Employee ID:</label>
+                                <input type="text" id="empId" placeholder="Enter Employee ID" required>
+                            </div>
+                            <div class="form-buttons">
+                                <button type="submit" class="btn-primary">
+                                    <span class="material-icons">login</span>
+                                    Login
+                                </button>
+                                <button type="button" id="cancelBtn" class="btn-secondary">
+                                    <span class="material-icons">cancel</span>
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                        <div class="admin-section">
+                            <button id="adminLoginBtn" class="btn-admin">
+                                <span class="material-icons">admin_panel_settings</span>
+                                Admin Login
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin View -->
+            <div id="adminView" class="view">
+                <div class="page-header">
+                    <h2>Employee Directory</h2>
+                    <button id="backToLoginBtn" class="btn-secondary">
+                        <span class="material-icons">arrow_back</span>
+                        Back to Login
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Employee Directory</h3>
+                        <div class="table-actions">
+                            <div class="search-box">
+                                <span class="material-icons">search</span>
+                                <input type="text" id="employeeSearchInput" placeholder="Search employees...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-wrapper scrollable">
+                        <table id="employeeTable">
+                            <thead>
+                                <tr>
+                                    <th>EMP No</th>
+                                    <th>Name</th>
+                                    <th>Designation</th>
+                                    <th>Group</th>
+                                    <th>Gross Salary</th>
+                                    <th>Net Salary</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employeeTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employee Details View -->
+            <div id="employeeView" class="view">
+                <div class="employee-header">
+                    <button id="backBtn" class="btn-secondary">
+                        <span class="material-icons">arrow_back</span>
+                        Back
+                    </button>
+                    <div class="employee-info">
+                        <h2 id="employeeName">Employee Name</h2>
+                        <div class="employee-meta">
+                            <span id="employeeId">EMP ID: </span>
+                            <span id="employeeDesignation">Designation: </span>
+                            <span id="employeeGroup">Group: </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="employee-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <span class="material-icons">calendar_today</span>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="empTotalMonths">0</h3>
+                            <p>Total Months</p>
+                        </div>
+                    </div>
+                    <div class="stat-card total-gross">
+                        <div class="stat-icon">
+                            <span class="material-icons">monetization_on</span>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="empTotalGross">₹0</h3>
+                            <p>Total Gross</p>
+                        </div>
+                    </div>
+                    <div class="stat-card total-deductions">
+                        <div class="stat-icon">
+                            <span class="material-icons">remove_circle</span>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="empTotalDeductions">₹0</h3>
+                            <p>Total Deductions</p>
+                        </div>
+                    </div>
+                    <div class="stat-card total-net">
+                        <div class="stat-icon">
+                            <span class="material-icons">account_balance_wallet</span>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="empTotalNet">₹0</h3>
+                            <p>Total Net</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Salary History</h3>
+                    </div>
+                    <div class="table-wrapper scrollable">
+                        <table id="salaryHistoryTable">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Year</th>
+                                    <th>Basic</th>
+                                    <th>DA</th>
+                                    <th>HRA</th>
+                                    <th>Gross Salary</th>
+                                    <th>Deductions</th>
+                                    <th>Net Salary</th>
+                                </tr>
+                            </thead>
+                            <tbody id="salaryHistoryBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Salary Details Modal -->
+    <div id="salaryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Salary Details for <span id="modalMonthYear"></span></h3>
+            </div>
+            <div class="modal-body">
+                <div class="employee-details">
+                    <div class="detail-row">
+                        <span class="label">Emp No:</span>
+                        <span id="modalEmpNo"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Name:</span>
+                        <span id="modalName"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Designation:</span>
+                        <span id="modalDesignation"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Pay Scale:</span>
+                        <span id="modalPayScale"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Basic:</span>
+                        <span id="modalBasic"></span>
+                    </div>
+                </div>
+                
+                <div class="salary-breakdown">
+                    <div class="allowances-section">
+                        <h4>Allowances:</h4>
+                        <div class="detail-row">
+                            <span class="label">DA:</span>
+                            <span id="modalDA"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">HRA:</span>
+                            <span id="modalHRA"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">P:</span>
+                            <span id="modalP"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">SFN:</span>
+                            <span id="modalSFN"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">SPAY-TYPIST:</span>
+                            <span id="modalSPAY"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="deductions-section">
+                        <h4>Deductions:</h4>
+                        <div class="detail-row">
+                            <span class="label">IT:</span>
+                            <span id="modalIT"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">PT:</span>
+                            <span id="modalPT"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">GSLIC:</span>
+                            <span id="modalGSLIC"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">LIC:</span>
+                            <span id="modalLIC"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">FBF:</span>
+                            <span id="modalFBF"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="total-section">
+                    <div class="detail-row total">
+                        <span class="label">Total Deductions:</span>
+                        <span id="modalTotalDeductions"></span>
+                    </div>
+                    <div class="detail-row total">
+                        <span class="label">Gross Salary:</span>
+                        <span id="modalGrossSalary"></span>
+                    </div>
+                    <div class="detail-row total">
+                        <span class="label">Net Salary:</span>
+                        <span id="modalNetSalary"></span>
+                    </div>
+                </div>
+                
+                <div class="bank-details">
+                    <div class="detail-row">
+                        <span class="label">Bank A/C No:</span>
+                        <span id="modalBankAC"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeModal" class="btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

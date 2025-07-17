@@ -77,7 +77,7 @@ A modern web application for managing and viewing salary information with CSV da
 ### For Administrators
 1. Click on "Employee Login" in the navigation
 2. Click on "Admin Login" button
-3. Enter the admin password: `teju2015`
+3. Enter the admin password: 
 4. Access the complete employee directory and manage salary information
 
 ### Features Usage

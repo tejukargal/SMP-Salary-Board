@@ -551,6 +551,7 @@ function showSummaryModal(year, month) {
     document.getElementById('modalBasic').textContent = `₹${formatIndianNumber(totalBasic)}`;
     document.getElementById('modalDA').textContent = `₹${formatIndianNumber(totalDA)}`;
     document.getElementById('modalHRA').textContent = `₹${formatIndianNumber(totalHRA)}`;
+    document.getElementById('modalIR').textContent = `₹${formatIndianNumber(monthData.reduce((sum, row) => sum + row['IR'], 0))}`;
     document.getElementById('modalP').textContent = `₹${formatIndianNumber(monthData.reduce((sum, row) => sum + row['P'], 0))}`;
     document.getElementById('modalSFN').textContent = `₹${formatIndianNumber(monthData.reduce((sum, row) => sum + row['SFN'], 0))}`;
     document.getElementById('modalSPAY').textContent = `₹${formatIndianNumber(monthData.reduce((sum, row) => sum + row['SPAY-TYPIST'], 0))}`;
@@ -587,6 +588,7 @@ function showEmployeeModal(empNo, year, month) {
     document.getElementById('modalBasic').textContent = `₹${formatIndianNumber(employeeData['Basic'])}`;
     document.getElementById('modalDA').textContent = `₹${formatIndianNumber(employeeData['DA'])}`;
     document.getElementById('modalHRA').textContent = `₹${formatIndianNumber(employeeData['HRA'])}`;
+    document.getElementById('modalIR').textContent = `₹${formatIndianNumber(employeeData['IR'])}`;
     document.getElementById('modalP').textContent = `₹${formatIndianNumber(employeeData['P'])}`;
     document.getElementById('modalSFN').textContent = `₹${formatIndianNumber(employeeData['SFN'])}`;
     document.getElementById('modalSPAY').textContent = `₹${formatIndianNumber(employeeData['SPAY-TYPIST'])}`;

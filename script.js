@@ -10,16 +10,19 @@ const employeeView = document.getElementById('employeeView');
 const adminView = document.getElementById('adminView');
 const dashboardBtn = document.getElementById('dashboardBtn');
 const loginBtn = document.getElementById('loginBtn');
-const backBtn = document.getElementById('backBtn');
+const backBtn = document.getElementById('backBtn'); // This element doesn't exist in HTML
 const loginForm = document.getElementById('loginForm');
 const empIdInput = document.getElementById('empId');
 const themeToggle = document.getElementById('themeToggle');
 const cancelBtn = document.getElementById('cancelBtn');
 const adminLoginBtn = document.getElementById('adminLoginBtn');
-const backToLoginBtn = document.getElementById('backToLoginBtn');
 const clearFiltersBtn = document.getElementById('clearFilters');
 const salaryModal = document.getElementById('salaryModal');
 const closeModalBtn = document.getElementById('closeModal');
+const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+const employeeLogoutBtn = document.getElementById('employeeLogoutBtn');
+const backToAdminBtn = document.getElementById('backToAdminBtn');
+let cameFromAdmin = false;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
@@ -31,15 +34,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Setup event listeners
 function setupEventListeners() {
-    dashboardBtn.addEventListener('click', () => showView('dashboard'));
+    dashboardBtn.addEventListener('click', handleDashboardNavigation);
     loginBtn.addEventListener('click', () => showView('login'));
-    backBtn.addEventListener('click', () => showView('dashboard'));
+    // backBtn.addEventListener('click', handleDashboardNavigation); // Commented out as backBtn doesn't exist
     themeToggle.addEventListener('click', toggleTheme);
     cancelBtn.addEventListener('click', () => showView('dashboard'));
     adminLoginBtn.addEventListener('click', handleAdminLogin);
-    backToLoginBtn.addEventListener('click', () => showView('login'));
+    
+    // Check if logout buttons exist before adding listeners
+    if (adminLogoutBtn) {
+        adminLogoutBtn.addEventListener('click', handleAdminLogout);
+    }
+    if (employeeLogoutBtn) {
+        employeeLogoutBtn.addEventListener('click', handleEmployeeLogout);
+    }
+    if (backToAdminBtn) {
+        backToAdminBtn.addEventListener('click', handleBackToAdmin);
+    }
+    
     clearFiltersBtn.addEventListener('click', clearFilters);
-    closeModalBtn.addEventListener('click', closeModal);
+    
+    // Ensure close modal button works
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closeModal);
+    }
     
     loginForm.addEventListener('submit', handleLogin);
     
@@ -48,8 +66,17 @@ function setupEventListeners() {
     document.getElementById('employeeSearchInput').addEventListener('input', debounce(filterEmployeeData, 300));
     
     // Close modal when clicking outside
-    salaryModal.addEventListener('click', (e) => {
-        if (e.target === salaryModal) {
+    if (salaryModal) {
+        salaryModal.addEventListener('click', (e) => {
+            if (e.target === salaryModal) {
+                closeModal();
+            }
+        });
+    }
+    
+    // Add keyboard ESC support for modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && salaryModal && salaryModal.classList.contains('active')) {
             closeModal();
         }
     });
@@ -63,7 +90,7 @@ function initializeTheme() {
 }
 
 function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     
     document.documentElement.setAttribute('data-theme', newTheme);
@@ -73,7 +100,9 @@ function toggleTheme() {
 
 function updateThemeIcon(theme) {
     const icon = themeToggle.querySelector('.material-icons');
-    icon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+    if (icon) {
+        icon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+    }
 }
 
 // Clear filters function
@@ -278,7 +307,9 @@ function updateSummaryTable() {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${summary.year}</td>
-            <td class="clickable-cell" onclick="showSummaryModal('${summary.year}', '${summary.month}')">${summary.month}</td>
+            <td class="clickable-cell" onclick="showSummaryModal('${summary.year}', '${summary.month}')">
+                <span class="month-btn ${getMonthClass(summary.month)}">${summary.month}</span>
+            </td>
             <td>₹${formatIndianNumber(summary.totalBasic)}</td>
             <td>₹${formatIndianNumber(summary.totalDA)}</td>
             <td>₹${formatIndianNumber(summary.totalHRA)}</td>
@@ -348,6 +379,12 @@ function handleLogin(event) {
         return;
     }
     
+    // Check if data is loaded
+    if (!salaryData || salaryData.length === 0) {
+        alert('Data is still loading. Please wait a moment and try again.');
+        return;
+    }
+    
     const employee = salaryData.find(row => row['EMP No'] === empId);
     if (!employee) {
         alert('Employee ID not found. Please check your ID and try again.');
@@ -366,6 +403,16 @@ function viewEmployee(empNo) {
     }
     
     currentEmployee = employeeData[0];
+    
+    // Check if we came from admin view
+    const currentView = document.querySelector('.view.active');
+    if (currentView && currentView.id === 'adminView') {
+        cameFromAdmin = true;
+        backToAdminBtn.style.display = 'block';
+    } else {
+        cameFromAdmin = false;
+        backToAdminBtn.style.display = 'none';
+    }
     
     // Update employee info
     document.getElementById('employeeName').textContent = currentEmployee.Name;
@@ -406,7 +453,9 @@ function updateSalaryHistoryTable(employeeData) {
     sortedData.forEach(row => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td class="clickable-cell" onclick="showEmployeeModal('${row['EMP No']}', '${row.Year}', '${row.Month}')">${row.Month}</td>
+            <td class="clickable-cell" onclick="showEmployeeModal('${row['EMP No']}', '${row.Year}', '${row.Month}')">
+                <span class="month-btn ${getMonthClass(row.Month)}">${row.Month}</span>
+            </td>
             <td>${row.Year}</td>
             <td>₹${formatIndianNumber(row.Basic)}</td>
             <td>₹${formatIndianNumber(row.DA)}</td>
@@ -566,6 +615,68 @@ function showView(viewName) {
             employeeView.classList.add('active');
             break;
     }
+}
+
+// Dashboard navigation with logout check
+function handleDashboardNavigation() {
+    const currentView = document.querySelector('.view.active');
+    
+    if (currentView && (currentView.id === 'employeeView' || currentView.id === 'adminView')) {
+        const confirmLogout = confirm('Are you sure you want to logout? You will be redirected to the dashboard.');
+        if (confirmLogout) {
+            currentEmployee = null;
+            showView('dashboard');
+        }
+    } else {
+        showView('dashboard');
+    }
+}
+
+// Handle admin logout
+function handleAdminLogout() {
+    const confirmLogout = confirm('Are you sure you want to logout from admin panel?');
+    if (confirmLogout) {
+        showView('dashboard');
+    }
+}
+
+// Handle employee logout
+function handleEmployeeLogout() {
+    const confirmLogout = confirm('Are you sure you want to logout? You will be redirected to the dashboard.');
+    if (confirmLogout) {
+        currentEmployee = null;
+        cameFromAdmin = false;
+        backToAdminBtn.style.display = 'none';
+        showView('dashboard');
+    }
+}
+
+// Handle back to admin button
+function handleBackToAdmin() {
+    if (cameFromAdmin) {
+        cameFromAdmin = false;
+        backToAdminBtn.style.display = 'none';
+        showView('admin');
+    }
+}
+
+// Get month CSS class for background color
+function getMonthClass(monthName) {
+    const monthClasses = {
+        'January': 'month-january',
+        'February': 'month-february',
+        'March': 'month-march',
+        'April': 'month-april',
+        'May': 'month-may',
+        'June': 'month-june',
+        'July': 'month-july',
+        'August': 'month-august',
+        'September': 'month-september',
+        'October': 'month-october',
+        'November': 'month-november',
+        'December': 'month-december'
+    };
+    return monthClasses[monthName] || '';
 }
 
 // Utility function to debounce search

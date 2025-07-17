@@ -26,6 +26,10 @@
                         <span class="material-icons">person</span>
                         Employee Login
                     </button>
+                    <button id="adminLoginBtn" class="nav-btn">
+                        <span class="material-icons">admin_panel_settings</span>
+                        Admin Login
+                    </button>
                     <button id="themeToggle" class="theme-toggle">
                         <span class="material-icons">brightness_6</span>
                     </button>
@@ -149,12 +153,6 @@
                                 </button>
                             </div>
                         </form>
-                        <div class="admin-section">
-                            <button id="adminLoginBtn" class="btn-admin">
-                                <span class="material-icons">admin_panel_settings</span>
-                                Admin Login
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -163,10 +161,12 @@
             <div id="adminView" class="view">
                 <div class="page-header">
                     <h2>Employee Directory</h2>
-                    <button id="backToLoginBtn" class="btn-secondary">
-                        <span class="material-icons">arrow_back</span>
-                        Back to Login
-                    </button>
+                    <div class="header-actions">
+                        <button id="adminLogoutBtn" class="btn-secondary">
+                            <span class="material-icons">logout</span>
+                            Logout
+                        </button>
+                    </div>
                 </div>
 
                 <div class="table-container">
@@ -202,10 +202,6 @@
             <!-- Employee Details View -->
             <div id="employeeView" class="view">
                 <div class="employee-header">
-                    <button id="backBtn" class="btn-secondary">
-                        <span class="material-icons">arrow_back</span>
-                        Back
-                    </button>
                     <div class="employee-info">
                         <h2 id="employeeName">Employee Name</h2>
                         <div class="employee-meta">
@@ -213,6 +209,16 @@
                             <span id="employeeDesignation">Designation: </span>
                             <span id="employeeGroup">Group: </span>
                         </div>
+                    </div>
+                    <div class="header-actions">
+                        <button id="backToAdminBtn" class="btn-primary" style="display: none;">
+                            <span class="material-icons">arrow_back</span>
+                            Back to Admin
+                        </button>
+                        <button id="employeeLogoutBtn" class="btn-secondary">
+                            <span class="material-icons">logout</span>
+                            Logout
+                        </button>
                     </div>
                 </div>
 
@@ -306,7 +312,7 @@
                         <span class="label">Pay Scale:</span>
                         <span id="modalPayScale"></span>
                     </div>
-                    <div class="detail-row">
+                    <div class="detail-row" data-type="basic">
                         <span class="label">Basic:</span>
                         <span id="modalBasic"></span>
                     </div>
@@ -315,23 +321,23 @@
                 <div class="salary-breakdown">
                     <div class="allowances-section">
                         <h4>Allowances:</h4>
-                        <div class="detail-row">
+                        <div class="detail-row" data-type="allowance">
                             <span class="label">DA:</span>
                             <span id="modalDA"></span>
                         </div>
-                        <div class="detail-row">
+                        <div class="detail-row" data-type="allowance">
                             <span class="label">HRA:</span>
                             <span id="modalHRA"></span>
                         </div>
-                        <div class="detail-row">
+                        <div class="detail-row" data-type="allowance">
                             <span class="label">P:</span>
                             <span id="modalP"></span>
                         </div>
-                        <div class="detail-row">
+                        <div class="detail-row" data-type="allowance">
                             <span class="label">SFN:</span>
                             <span id="modalSFN"></span>
                         </div>
-                        <div class="detail-row">
+                        <div class="detail-row" data-type="allowance">
                             <span class="label">SPAY-TYPIST:</span>
                             <span id="modalSPAY"></span>
                         </div>
@@ -339,23 +345,23 @@
                     
                     <div class="deductions-section">
                         <h4>Deductions:</h4>
-                        <div class="detail-row">
+                        <div class="detail-row" data-type="deduction">
                             <span class="label">IT:</span>
                             <span id="modalIT"></span>
                         </div>
-                        <div class="detail-row">
+                        <div class="detail-row" data-type="deduction">
                             <span class="label">PT:</span>
                             <span id="modalPT"></span>
                         </div>
-                        <div class="detail-row">
+                        <div class="detail-row" data-type="deduction">
                             <span class="label">GSLIC:</span>
                             <span id="modalGSLIC"></span>
                         </div>
-                        <div class="detail-row">
+                        <div class="detail-row" data-type="deduction">
                             <span class="label">LIC:</span>
                             <span id="modalLIC"></span>
                         </div>
-                        <div class="detail-row">
+                        <div class="detail-row" data-type="deduction">
                             <span class="label">FBF:</span>
                             <span id="modalFBF"></span>
                         </div>
@@ -363,15 +369,15 @@
                 </div>
                 
                 <div class="total-section">
-                    <div class="detail-row total">
+                    <div class="detail-row total" data-type="deduction">
                         <span class="label">Total Deductions:</span>
                         <span id="modalTotalDeductions"></span>
                     </div>
-                    <div class="detail-row total">
+                    <div class="detail-row total" data-type="gross">
                         <span class="label">Gross Salary:</span>
                         <span id="modalGrossSalary"></span>
                     </div>
-                    <div class="detail-row total">
+                    <div class="detail-row total" data-type="net">
                         <span class="label">Net Salary:</span>
                         <span id="modalNetSalary"></span>
                     </div>

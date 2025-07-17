@@ -185,14 +185,14 @@ async function loadCSVData() {
 
 // Parse CSV data
 function parseCSV(csvText) {
-    const lines = csvText.split('\n');
-    const headers = lines[0].split(',');
+    const records = parseCSVRecords(csvText);
+    if (records.length === 0) return [];
+    
+    const headers = records[0];
     const data = [];
     
-    for (let i = 1; i < lines.length; i++) {
-        if (lines[i].trim() === '') continue;
-        
-        const values = parseCSVLine(lines[i]);
+    for (let i = 1; i < records.length; i++) {
+        const values = records[i];
         if (values.length === headers.length) {
             const row = {};
             headers.forEach((header, index) => {
@@ -223,28 +223,45 @@ function parseCSV(csvText) {
     return data;
 }
 
-// Parse a single CSV line (handles commas within quoted values)
-function parseCSVLine(line) {
-    const result = [];
+// Parse CSV records handling multi-line quoted fields
+function parseCSVRecords(csvText) {
+    const records = [];
     let current = '';
     let inQuotes = false;
+    let record = [];
+    let field = '';
     
-    for (let i = 0; i < line.length; i++) {
-        const char = line[i];
+    for (let i = 0; i < csvText.length; i++) {
+        const char = csvText[i];
         
         if (char === '"') {
             inQuotes = !inQuotes;
         } else if (char === ',' && !inQuotes) {
-            result.push(current);
-            current = '';
+            record.push(field);
+            field = '';
+        } else if (char === '\n' && !inQuotes) {
+            record.push(field);
+            if (record.length > 0 && record.some(f => f.trim() !== '')) {
+                records.push(record);
+            }
+            record = [];
+            field = '';
         } else {
-            current += char;
+            field += char;
         }
     }
     
-    result.push(current);
-    return result;
+    // Add the last record if it exists
+    if (field || record.length > 0) {
+        record.push(field);
+        if (record.length > 0 && record.some(f => f.trim() !== '')) {
+            records.push(record);
+        }
+    }
+    
+    return records;
 }
+
 
 // Populate filter dropdowns
 function populateFilters() {
@@ -331,7 +348,7 @@ function updateSummaryTable() {
             };
         }
         summaryData[key].employees.add(row['EMP No']);
-        summaryData[key].totalAllowances += (row['Basic'] + row['DA'] + row['HRA'] + row['IR'] + row['SFN'] + row['SPAY-TYPIST'] + row['P']);
+        summaryData[key].totalAllowances += row['Gross Salary'];
         summaryData[key].totalDeductions += row['Total Deductions'];
         summaryData[key].totalNet += row['Net Salary'];
     });
@@ -496,7 +513,7 @@ function updateSalaryHistoryTable(employeeData) {
     });
     
     sortedData.forEach(row => {
-        const totalAllowances = row['Basic'] + row['DA'] + row['HRA'] + row['IR'] + row['SFN'] + row['SPAY-TYPIST'] + row['P'];
+        const totalAllowances = row['Gross Salary'];
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td class="clickable-cell" onclick="showEmployeeModal('${row['EMP No']}', '${row.Year}', '${row.Month}')">

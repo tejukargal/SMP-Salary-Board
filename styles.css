@@ -1256,3 +1256,221 @@ tr:hover {
 [data-theme="dark"] .month-btn:hover {
     opacity: 1;
 }
+
+/* Salary Analysis Modal Styles */
+.analysis-content {
+    font-family: 'Inter', sans-serif;
+}
+
+.analysis-summary h4 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--border-color);
+    font-size: 1.1rem;
+}
+
+.analysis-points {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.analysis-point {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    border-left: 4px solid;
+    background: var(--background-tertiary);
+    transition: all 0.3s ease;
+}
+
+.analysis-point:hover {
+    transform: translateX(4px);
+    box-shadow: var(--shadow-md);
+}
+
+.analysis-point.positive {
+    border-left-color: #28a745;
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.05), rgba(40, 167, 69, 0.02));
+}
+
+.analysis-point.negative {
+    border-left-color: #dc3545;
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.05), rgba(220, 53, 69, 0.02));
+}
+
+.analysis-point.neutral {
+    border-left-color: #6c757d;
+    background: linear-gradient(135deg, rgba(108, 117, 125, 0.05), rgba(108, 117, 125, 0.02));
+}
+
+.analysis-point.info {
+    border-left-color: #17a2b8;
+    background: linear-gradient(135deg, rgba(23, 162, 184, 0.05), rgba(23, 162, 184, 0.02));
+}
+
+.analysis-point.period {
+    border-left-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(124, 141, 181, 0.1), rgba(124, 141, 181, 0.05));
+    font-weight: 600;
+}
+
+.point-icon {
+    font-size: 1.2rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.analysis-point strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.analysis-point small {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: var(--spacing-xs);
+    display: block;
+}
+
+/* Dark mode adjustments for analysis */
+[data-theme="dark"] .analysis-point.positive {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
+}
+
+[data-theme="dark"] .analysis-point.negative {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+}
+
+[data-theme="dark"] .analysis-point.neutral {
+    background: linear-gradient(135deg, rgba(108, 117, 125, 0.1), rgba(108, 117, 125, 0.05));
+}
+
+[data-theme="dark"] .analysis-point.info {
+    background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(23, 162, 184, 0.05));
+}
+
+[data-theme="dark"] .analysis-point.period {
+    background: linear-gradient(135deg, rgba(139, 156, 200, 0.15), rgba(139, 156, 200, 0.08));
+}
+
+/* Monthly Comparison Styles */
+.monthly-comparison {
+    margin-top: var(--spacing-lg);
+    border-top: 2px solid var(--border-color);
+    padding-top: var(--spacing-lg);
+}
+
+.comparison-section h4 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1rem;
+}
+
+.comparison-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid;
+    background: var(--background-tertiary);
+    transition: all 0.3s ease;
+}
+
+.comparison-row:hover {
+    transform: translateX(2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.comparison-row.positive {
+    border-left-color: #28a745;
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.08), rgba(40, 167, 69, 0.04));
+}
+
+.comparison-row.negative {
+    border-left-color: #dc3545;
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.08), rgba(220, 53, 69, 0.04));
+}
+
+.comparison-row.neutral {
+    border-left-color: #6c757d;
+    background: linear-gradient(135deg, rgba(108, 117, 125, 0.08), rgba(108, 117, 125, 0.04));
+}
+
+.comparison-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.85rem;
+}
+
+.comparison-icon {
+    font-size: 1rem;
+}
+
+.comparison-values {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.current-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.change-value {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.no-comparison {
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: var(--spacing-md);
+    background: var(--background-tertiary);
+    border-radius: var(--radius-sm);
+}
+
+/* Dark mode adjustments for comparison */
+[data-theme="dark"] .comparison-row.positive {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.12), rgba(40, 167, 69, 0.06));
+}
+
+[data-theme="dark"] .comparison-row.negative {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.12), rgba(220, 53, 69, 0.06));
+}
+
+[data-theme="dark"] .comparison-row.neutral {
+    background: linear-gradient(135deg, rgba(108, 117, 125, 0.12), rgba(108, 117, 125, 0.06));
+}
+
+/* Year column styling for all tables */
+table td:nth-child(2),
+table th:nth-child(2) {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+/* Special styling for year cells in summary table */
+#summaryTable td:nth-child(2) {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+/* Special styling for year cells in salary history table */
+#salaryHistoryTable td:nth-child(2) {
+    color: var(--primary-color);
+    font-weight: 700;
+}

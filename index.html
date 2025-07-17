@@ -87,8 +87,12 @@
 
                 <div class="table-container">
                     <div class="table-header">
-                        <h3>Year & Month-wise Salary Summary</h3>
+                        <h3>Salary Summary</h3>
                         <div class="table-actions">
+                            <button id="dashboardAnalysisBtn" class="btn-primary">
+                                <span class="material-icons">analytics</span>
+                                Summary
+                            </button>
                             <div class="filter-group">
                                 <label for="yearFilter">Year:</label>
                                 <select id="yearFilter">
@@ -111,14 +115,12 @@
                         <table id="summaryTable">
                             <thead>
                                 <tr>
-                                    <th>Year</th>
                                     <th>Month</th>
-                                    <th>Total Basic</th>
-                                    <th>Total DA</th>
-                                    <th>Total HRA</th>
-                                    <th>Total Gross</th>
+                                    <th>Year</th>
+                                    <th>Emp Count</th>
+                                    <th>Total Allowances</th>
                                     <th>Total Deductions</th>
-                                    <th>Total Net</th>
+                                    <th>Total Net Salary</th>
                                 </tr>
                             </thead>
                             <tbody id="summaryTableBody">
@@ -264,6 +266,12 @@
                 <div class="table-container">
                     <div class="table-header">
                         <h3>Salary History</h3>
+                        <div class="table-actions">
+                            <button id="salaryAnalysisBtn" class="btn-primary">
+                                <span class="material-icons">analytics</span>
+                                Summary
+                            </button>
+                        </div>
                     </div>
                     <div class="table-wrapper scrollable">
                         <table id="salaryHistoryTable">
@@ -271,12 +279,9 @@
                                 <tr>
                                     <th>Month</th>
                                     <th>Year</th>
-                                    <th>Basic</th>
-                                    <th>DA</th>
-                                    <th>HRA</th>
-                                    <th>Gross Salary</th>
-                                    <th>Deductions</th>
-                                    <th>Net Salary</th>
+                                    <th>Total Allowances</th>
+                                    <th>Total Deductions</th>
+                                    <th>Total Net Salary</th>
                                 </tr>
                             </thead>
                             <tbody id="salaryHistoryBody">
@@ -389,9 +394,47 @@
                         <span id="modalBankAC"></span>
                     </div>
                 </div>
+
+                <div id="monthlyComparison" class="monthly-comparison">
+                    <!-- Monthly comparison content will be dynamically generated -->
+                </div>
             </div>
             <div class="modal-footer">
                 <button id="closeModal" class="btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salary Analysis Modal -->
+    <div id="salaryAnalysisModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Salary Analysis Summary for <span id="analysisEmployeeName"></span></h3>
+            </div>
+            <div class="modal-body">
+                <div id="analysisContent" class="analysis-content">
+                    <!-- Analysis content will be dynamically generated -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeAnalysisModal" class="btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Analysis Modal -->
+    <div id="dashboardAnalysisModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Dashboard Analysis Summary</h3>
+            </div>
+            <div class="modal-body">
+                <div id="dashboardAnalysisContent" class="analysis-content">
+                    <!-- Dashboard analysis content will be dynamically generated -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeDashboardAnalysisModal" class="btn-secondary">Close</button>
             </div>
         </div>
     </div>

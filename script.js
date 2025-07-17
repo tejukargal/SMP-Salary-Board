@@ -22,6 +22,12 @@ const closeModalBtn = document.getElementById('closeModal');
 const adminLogoutBtn = document.getElementById('adminLogoutBtn');
 const employeeLogoutBtn = document.getElementById('employeeLogoutBtn');
 const backToAdminBtn = document.getElementById('backToAdminBtn');
+const salaryAnalysisBtn = document.getElementById('salaryAnalysisBtn');
+const salaryAnalysisModal = document.getElementById('salaryAnalysisModal');
+const closeAnalysisModalBtn = document.getElementById('closeAnalysisModal');
+const dashboardAnalysisBtn = document.getElementById('dashboardAnalysisBtn');
+const dashboardAnalysisModal = document.getElementById('dashboardAnalysisModal');
+const closeDashboardAnalysisModalBtn = document.getElementById('closeDashboardAnalysisModal');
 let cameFromAdmin = false;
 
 // Initialize the application
@@ -51,6 +57,18 @@ function setupEventListeners() {
     if (backToAdminBtn) {
         backToAdminBtn.addEventListener('click', handleBackToAdmin);
     }
+    if (salaryAnalysisBtn) {
+        salaryAnalysisBtn.addEventListener('click', showSalaryAnalysis);
+    }
+    if (closeAnalysisModalBtn) {
+        closeAnalysisModalBtn.addEventListener('click', closeSalaryAnalysisModal);
+    }
+    if (dashboardAnalysisBtn) {
+        dashboardAnalysisBtn.addEventListener('click', showDashboardAnalysis);
+    }
+    if (closeDashboardAnalysisModalBtn) {
+        closeDashboardAnalysisModalBtn.addEventListener('click', closeDashboardAnalysisModal);
+    }
     
     clearFiltersBtn.addEventListener('click', clearFilters);
     
@@ -74,10 +92,36 @@ function setupEventListeners() {
         });
     }
     
-    // Add keyboard ESC support for modal
+    // Close analysis modal when clicking outside
+    if (salaryAnalysisModal) {
+        salaryAnalysisModal.addEventListener('click', (e) => {
+            if (e.target === salaryAnalysisModal) {
+                closeSalaryAnalysisModal();
+            }
+        });
+    }
+    
+    // Close dashboard analysis modal when clicking outside
+    if (dashboardAnalysisModal) {
+        dashboardAnalysisModal.addEventListener('click', (e) => {
+            if (e.target === dashboardAnalysisModal) {
+                closeDashboardAnalysisModal();
+            }
+        });
+    }
+    
+    // Add keyboard ESC support for modals
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && salaryModal && salaryModal.classList.contains('active')) {
-            closeModal();
+        if (e.key === 'Escape') {
+            if (salaryModal && salaryModal.classList.contains('active')) {
+                closeModal();
+            }
+            if (salaryAnalysisModal && salaryAnalysisModal.classList.contains('active')) {
+                closeSalaryAnalysisModal();
+            }
+            if (dashboardAnalysisModal && dashboardAnalysisModal.classList.contains('active')) {
+                closeDashboardAnalysisModal();
+            }
         }
     });
 }
@@ -279,20 +323,23 @@ function updateSummaryTable() {
             summaryData[key] = {
                 year: row.Year,
                 month: row.Month,
-                totalBasic: 0,
-                totalDA: 0,
-                totalHRA: 0,
-                totalGross: 0,
+                empCount: 0,
+                totalAllowances: 0,
                 totalDeductions: 0,
-                totalNet: 0
+                totalNet: 0,
+                employees: new Set()
             };
         }
-        summaryData[key].totalBasic += row['Basic'];
-        summaryData[key].totalDA += row['DA'];
-        summaryData[key].totalHRA += row['HRA'];
-        summaryData[key].totalGross += row['Gross Salary'];
+        summaryData[key].employees.add(row['EMP No']);
+        summaryData[key].totalAllowances += (row['Basic'] + row['DA'] + row['HRA'] + row['IR'] + row['SFN'] + row['SPAY-TYPIST'] + row['P']);
         summaryData[key].totalDeductions += row['Total Deductions'];
         summaryData[key].totalNet += row['Net Salary'];
+    });
+    
+    // Convert employee sets to counts
+    Object.values(summaryData).forEach(summary => {
+        summary.empCount = summary.employees.size;
+        delete summary.employees;
     });
     
     // Sort by year and month
@@ -306,14 +353,12 @@ function updateSummaryTable() {
     sortedData.forEach(summary => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${summary.year}</td>
             <td class="clickable-cell" onclick="showSummaryModal('${summary.year}', '${summary.month}')">
                 <span class="month-btn ${getMonthClass(summary.month)}">${summary.month}</span>
             </td>
-            <td>₹${formatIndianNumber(summary.totalBasic)}</td>
-            <td>₹${formatIndianNumber(summary.totalDA)}</td>
-            <td>₹${formatIndianNumber(summary.totalHRA)}</td>
-            <td>₹${formatIndianNumber(summary.totalGross)}</td>
+            <td>${summary.year}</td>
+            <td>${summary.empCount}</td>
+            <td>₹${formatIndianNumber(summary.totalAllowances)}</td>
             <td>₹${formatIndianNumber(summary.totalDeductions)}</td>
             <td>₹${formatIndianNumber(summary.totalNet)}</td>
         `;
@@ -451,16 +496,14 @@ function updateSalaryHistoryTable(employeeData) {
     });
     
     sortedData.forEach(row => {
+        const totalAllowances = row['Basic'] + row['DA'] + row['HRA'] + row['IR'] + row['SFN'] + row['SPAY-TYPIST'] + row['P'];
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td class="clickable-cell" onclick="showEmployeeModal('${row['EMP No']}', '${row.Year}', '${row.Month}')">
                 <span class="month-btn ${getMonthClass(row.Month)}">${row.Month}</span>
             </td>
             <td>${row.Year}</td>
-            <td>₹${formatIndianNumber(row.Basic)}</td>
-            <td>₹${formatIndianNumber(row.DA)}</td>
-            <td>₹${formatIndianNumber(row.HRA)}</td>
-            <td>₹${formatIndianNumber(row['Gross Salary'])}</td>
+            <td>₹${formatIndianNumber(totalAllowances)}</td>
             <td>₹${formatIndianNumber(row['Total Deductions'])}</td>
             <td>₹${formatIndianNumber(row['Net Salary'])}</td>
         `;
@@ -504,6 +547,9 @@ function showSummaryModal(year, month) {
     document.getElementById('modalNetSalary').textContent = `₹${formatIndianNumber(totalNet)}`;
     document.getElementById('modalBankAC').textContent = 'Multiple Accounts';
     
+    // Add monthly comparison details
+    addMonthlyComparisonDetails(year, month, true);
+    
     salaryModal.classList.add('active');
 }
 
@@ -536,6 +582,9 @@ function showEmployeeModal(empNo, year, month) {
     document.getElementById('modalGrossSalary').textContent = `₹${formatIndianNumber(employeeData['Gross Salary'])}`;
     document.getElementById('modalNetSalary').textContent = `₹${formatIndianNumber(employeeData['Net Salary'])}`;
     document.getElementById('modalBankAC').textContent = employeeData['Bank A/C Number'];
+    
+    // Add monthly comparison details for employee
+    addMonthlyComparisonDetails(year, month, false, empNo);
     
     salaryModal.classList.add('active');
 }
@@ -677,6 +726,457 @@ function getMonthClass(monthName) {
         'December': 'month-december'
     };
     return monthClasses[monthName] || '';
+}
+
+// Show salary analysis modal
+function showSalaryAnalysis() {
+    if (!currentEmployee) return;
+    
+    const employeeData = salaryData.filter(row => row['EMP No'] === currentEmployee['EMP No']);
+    if (employeeData.length < 2) {
+        alert('Need at least 2 months of data to generate analysis.');
+        return;
+    }
+    
+    const analysis = generateSalaryAnalysis(employeeData);
+    document.getElementById('analysisEmployeeName').textContent = currentEmployee.Name;
+    document.getElementById('analysisContent').innerHTML = analysis;
+    salaryAnalysisModal.classList.add('active');
+}
+
+// Generate salary analysis
+function generateSalaryAnalysis(employeeData) {
+    // Sort data chronologically
+    const sortedData = employeeData.sort((a, b) => {
+        if (a.Year !== b.Year) {
+            return a.Year - b.Year;
+        }
+        return getMonthNumber(a.Month) - getMonthNumber(b.Month);
+    });
+    
+    let analysisHTML = '<div class="analysis-summary">';
+    analysisHTML += `<h4>📊 Salary Analysis Summary (${sortedData.length} months)</h4>`;
+    
+    // Overall summary and 6-month period analysis
+    const firstMonth = sortedData[0];
+    const lastMonth = sortedData[sortedData.length - 1];
+    
+    // Add 6-month period analysis if enough data
+    if (sortedData.length >= 6) {
+        analysisHTML += '<h5>📊 6-Month Period Analysis</h5>';
+        const sixMonthPeriods = getSixMonthPeriods(sortedData);
+        sixMonthPeriods.forEach((period, index) => {
+            analysisHTML += generatePeriodAnalysis(period, index);
+        });
+    }
+    
+    const basicChange = lastMonth['Basic'] - firstMonth['Basic'];
+    const grossChange = lastMonth['Gross Salary'] - firstMonth['Gross Salary'];
+    const netChange = lastMonth['Net Salary'] - firstMonth['Net Salary'];
+    const deductionsChange = lastMonth['Total Deductions'] - firstMonth['Total Deductions'];
+    
+    // Calculate DA and HRA percentage changes
+    const daPercentageFirst = firstMonth['Basic'] > 0 ? (firstMonth['DA'] / firstMonth['Basic']) * 100 : 0;
+    const daPercentageLast = lastMonth['Basic'] > 0 ? (lastMonth['DA'] / lastMonth['Basic']) * 100 : 0;
+    const hraPercentageFirst = firstMonth['Basic'] > 0 ? (firstMonth['HRA'] / firstMonth['Basic']) * 100 : 0;
+    const hraPercentageLast = lastMonth['Basic'] > 0 ? (lastMonth['HRA'] / lastMonth['Basic']) * 100 : 0;
+    
+    analysisHTML += '<div class="analysis-points">';
+    
+    // Period information
+    analysisHTML += `<div class="analysis-point period">`;
+    analysisHTML += `<span class="point-icon">📅</span>`;
+    analysisHTML += `<strong>Analysis Period:</strong> ${firstMonth.Month} ${firstMonth.Year} to ${lastMonth.Month} ${lastMonth.Year}`;
+    analysisHTML += `</div>`;
+    
+    // Basic salary analysis
+    if (basicChange !== 0) {
+        const basicPercentage = ((basicChange / firstMonth['Basic']) * 100).toFixed(2);
+        analysisHTML += `<div class="analysis-point ${basicChange > 0 ? 'positive' : 'negative'}">`;
+        analysisHTML += `<span class="point-icon">${basicChange > 0 ? '📈' : '📉'}</span>`;
+        analysisHTML += `<strong>Basic Salary:</strong> ${basicChange > 0 ? 'Increased' : 'Decreased'} by ₹${formatIndianNumber(Math.abs(basicChange))} (${Math.abs(basicPercentage)}%)`;
+        analysisHTML += `<br><small>From ₹${formatIndianNumber(firstMonth['Basic'])} to ₹${formatIndianNumber(lastMonth['Basic'])}</small>`;
+        analysisHTML += `</div>`;
+    } else {
+        analysisHTML += `<div class="analysis-point neutral">`;
+        analysisHTML += `<span class="point-icon">➖</span>`;
+        analysisHTML += `<strong>Basic Salary:</strong> Remained constant at ₹${formatIndianNumber(firstMonth['Basic'])}`;
+        analysisHTML += `</div>`;
+    }
+    
+    // Gross salary analysis
+    if (grossChange !== 0) {
+        const grossPercentage = ((grossChange / firstMonth['Gross Salary']) * 100).toFixed(2);
+        analysisHTML += `<div class="analysis-point ${grossChange > 0 ? 'positive' : 'negative'}">`;
+        analysisHTML += `<span class="point-icon">${grossChange > 0 ? '💰' : '💸'}</span>`;
+        analysisHTML += `<strong>Gross Salary:</strong> ${grossChange > 0 ? 'Increased' : 'Decreased'} by ₹${formatIndianNumber(Math.abs(grossChange))} (${Math.abs(grossPercentage)}%)`;
+        analysisHTML += `<br><small>From ₹${formatIndianNumber(firstMonth['Gross Salary'])} to ₹${formatIndianNumber(lastMonth['Gross Salary'])}</small>`;
+        analysisHTML += `</div>`;
+    } else {
+        analysisHTML += `<div class="analysis-point neutral">`;
+        analysisHTML += `<span class="point-icon">💰</span>`;
+        analysisHTML += `<strong>Gross Salary:</strong> Remained constant at ₹${formatIndianNumber(firstMonth['Gross Salary'])}`;
+        analysisHTML += `</div>`;
+    }
+    
+    // Net salary analysis
+    if (netChange !== 0) {
+        const netPercentage = ((netChange / firstMonth['Net Salary']) * 100).toFixed(2);
+        analysisHTML += `<div class="analysis-point ${netChange > 0 ? 'positive' : 'negative'}">`;
+        analysisHTML += `<span class="point-icon">${netChange > 0 ? '✅' : '❌'}</span>`;
+        analysisHTML += `<strong>Net Salary:</strong> ${netChange > 0 ? 'Increased' : 'Decreased'} by ₹${formatIndianNumber(Math.abs(netChange))} (${Math.abs(netPercentage)}%)`;
+        analysisHTML += `<br><small>From ₹${formatIndianNumber(firstMonth['Net Salary'])} to ₹${formatIndianNumber(lastMonth['Net Salary'])}</small>`;
+        analysisHTML += `</div>`;
+    } else {
+        analysisHTML += `<div class="analysis-point neutral">`;
+        analysisHTML += `<span class="point-icon">✅</span>`;
+        analysisHTML += `<strong>Net Salary:</strong> Remained constant at ₹${formatIndianNumber(firstMonth['Net Salary'])}`;
+        analysisHTML += `</div>`;
+    }
+    
+    // DA percentage analysis
+    const daPercentageChange = daPercentageLast - daPercentageFirst;
+    if (Math.abs(daPercentageChange) > 0.1) {
+        analysisHTML += `<div class="analysis-point ${daPercentageChange > 0 ? 'positive' : 'negative'}">`;
+        analysisHTML += `<span class="point-icon">🏦</span>`;
+        analysisHTML += `<strong>DA Percentage:</strong> ${daPercentageChange > 0 ? 'Increased' : 'Decreased'} by ${Math.abs(daPercentageChange).toFixed(2)}%`;
+        analysisHTML += `<br><small>From ${daPercentageFirst.toFixed(2)}% to ${daPercentageLast.toFixed(2)}% of Basic</small>`;
+        analysisHTML += `</div>`;
+    } else {
+        analysisHTML += `<div class="analysis-point neutral">`;
+        analysisHTML += `<span class="point-icon">🏦</span>`;
+        analysisHTML += `<strong>DA Percentage:</strong> Remained stable at approximately ${daPercentageFirst.toFixed(2)}% of Basic`;
+        analysisHTML += `</div>`;
+    }
+    
+    // HRA percentage analysis
+    const hraPercentageChange = hraPercentageLast - hraPercentageFirst;
+    if (Math.abs(hraPercentageChange) > 0.1) {
+        analysisHTML += `<div class="analysis-point ${hraPercentageChange > 0 ? 'positive' : 'negative'}">`;
+        analysisHTML += `<span class="point-icon">🏠</span>`;
+        analysisHTML += `<strong>HRA Percentage:</strong> ${hraPercentageChange > 0 ? 'Increased' : 'Decreased'} by ${Math.abs(hraPercentageChange).toFixed(2)}%`;
+        analysisHTML += `<br><small>From ${hraPercentageFirst.toFixed(2)}% to ${hraPercentageLast.toFixed(2)}% of Basic</small>`;
+        analysisHTML += `</div>`;
+    } else {
+        analysisHTML += `<div class="analysis-point neutral">`;
+        analysisHTML += `<span class="point-icon">🏠</span>`;
+        analysisHTML += `<strong>HRA Percentage:</strong> Remained stable at approximately ${hraPercentageFirst.toFixed(2)}% of Basic`;
+        analysisHTML += `</div>`;
+    }
+    
+    // Deductions analysis
+    if (deductionsChange !== 0) {
+        const deductionsPercentage = ((deductionsChange / firstMonth['Total Deductions']) * 100).toFixed(2);
+        analysisHTML += `<div class="analysis-point ${deductionsChange > 0 ? 'negative' : 'positive'}">`;
+        analysisHTML += `<span class="point-icon">${deductionsChange > 0 ? '⬆️' : '⬇️'}</span>`;
+        analysisHTML += `<strong>Total Deductions:</strong> ${deductionsChange > 0 ? 'Increased' : 'Decreased'} by ₹${formatIndianNumber(Math.abs(deductionsChange))} (${Math.abs(deductionsPercentage)}%)`;
+        analysisHTML += `<br><small>From ₹${formatIndianNumber(firstMonth['Total Deductions'])} to ₹${formatIndianNumber(lastMonth['Total Deductions'])}</small>`;
+        analysisHTML += `</div>`;
+    } else {
+        analysisHTML += `<div class="analysis-point neutral">`;
+        analysisHTML += `<span class="point-icon">⬜</span>`;
+        analysisHTML += `<strong>Total Deductions:</strong> Remained constant at ₹${formatIndianNumber(firstMonth['Total Deductions'])}`;
+        analysisHTML += `</div>`;
+    }
+    
+    // Month-to-month analysis if more than 2 months
+    if (sortedData.length > 2) {
+        analysisHTML += `<div class="analysis-point info">`;
+        analysisHTML += `<span class="point-icon">📋</span>`;
+        analysisHTML += `<strong>Consistency:</strong> `;
+        
+        let hasVariations = false;
+        for (let i = 1; i < sortedData.length; i++) {
+            if (sortedData[i]['Basic'] !== sortedData[i-1]['Basic']) {
+                hasVariations = true;
+                break;
+            }
+        }
+        
+        if (hasVariations) {
+            analysisHTML += `Multiple salary adjustments observed during the period`;
+        } else {
+            analysisHTML += `Salary structure remained consistent throughout the period`;
+        }
+        analysisHTML += `</div>`;
+    }
+    
+    analysisHTML += '</div></div>';
+    return analysisHTML;
+}
+
+// Get 6-month periods for analysis
+function getSixMonthPeriods(sortedData) {
+    const periods = [];
+    for (let i = 0; i < sortedData.length; i += 6) {
+        const period = sortedData.slice(i, Math.min(i + 6, sortedData.length));
+        if (period.length >= 3) { // Minimum 3 months for a meaningful period
+            periods.push(period);
+        }
+    }
+    return periods;
+}
+
+// Generate analysis for a 6-month period
+function generatePeriodAnalysis(period, index) {
+    const startMonth = period[0];
+    const endMonth = period[period.length - 1];
+    
+    const basicChange = endMonth['Basic'] - startMonth['Basic'];
+    const grossChange = endMonth['Gross Salary'] - startMonth['Gross Salary'];
+    const netChange = endMonth['Net Salary'] - startMonth['Net Salary'];
+    
+    let periodHTML = `<div class="analysis-point period">`;
+    periodHTML += `<span class="point-icon">📅</span>`;
+    periodHTML += `<strong>Period ${index + 1}:</strong> ${startMonth.Month} ${startMonth.Year} to ${endMonth.Month} ${endMonth.Year} (${period.length} months)`;
+    
+    if (basicChange !== 0) {
+        const basicPercentage = ((basicChange / startMonth['Basic']) * 100).toFixed(2);
+        periodHTML += `<br><small>Basic: ${basicChange > 0 ? '+' : ''}₹${formatIndianNumber(basicChange)} (${basicPercentage > 0 ? '+' : ''}${basicPercentage}%)</small>`;
+    }
+    
+    periodHTML += `</div>`;
+    return periodHTML;
+}
+
+// Show dashboard analysis modal
+function showDashboardAnalysis() {
+    const analysis = generateDashboardAnalysis();
+    document.getElementById('dashboardAnalysisContent').innerHTML = analysis;
+    dashboardAnalysisModal.classList.add('active');
+}
+
+// Generate dashboard analysis
+function generateDashboardAnalysis() {
+    if (filteredData.length === 0) {
+        return '<div class="analysis-summary"><h4>No data available for analysis</h4></div>';
+    }
+    
+    // Group data by year-month for dashboard analysis
+    const monthlyData = {};
+    filteredData.forEach(row => {
+        const key = `${row.Year}-${row.Month}`;
+        if (!monthlyData[key]) {
+            monthlyData[key] = {
+                year: row.Year,
+                month: row.Month,
+                empCount: new Set(),
+                totalGross: 0,
+                totalDeductions: 0,
+                totalNet: 0
+            };
+        }
+        monthlyData[key].empCount.add(row['EMP No']);
+        monthlyData[key].totalGross += row['Gross Salary'];
+        monthlyData[key].totalDeductions += row['Total Deductions'];
+        monthlyData[key].totalNet += row['Net Salary'];
+    });
+    
+    // Convert to array and calculate employee counts
+    const sortedMonthly = Object.values(monthlyData).map(month => ({
+        ...month,
+        empCount: month.empCount.size
+    })).sort((a, b) => {
+        if (a.year !== b.year) return a.year - b.year;
+        return getMonthNumber(a.month) - getMonthNumber(b.month);
+    });
+    
+    if (sortedMonthly.length < 2) {
+        return '<div class="analysis-summary"><h4>Need at least 2 months of data for analysis</h4></div>';
+    }
+    
+    const firstMonth = sortedMonthly[0];
+    const lastMonth = sortedMonthly[sortedMonthly.length - 1];
+    
+    let analysisHTML = '<div class="analysis-summary">';
+    analysisHTML += `<h4>📊 Dashboard Analysis (${sortedMonthly.length} months)</h4>`;
+    analysisHTML += '<div class="analysis-points">';
+    
+    // Period information
+    analysisHTML += `<div class="analysis-point period">`;
+    analysisHTML += `<span class="point-icon">📅</span>`;
+    analysisHTML += `<strong>Analysis Period:</strong> ${firstMonth.month} ${firstMonth.year} to ${lastMonth.month} ${lastMonth.year}`;
+    analysisHTML += `</div>`;
+    
+    // Employee count analysis
+    const empCountChange = lastMonth.empCount - firstMonth.empCount;
+    if (empCountChange !== 0) {
+        const empCountPercentage = ((empCountChange / firstMonth.empCount) * 100).toFixed(2);
+        analysisHTML += `<div class="analysis-point ${empCountChange > 0 ? 'positive' : 'negative'}">`;
+        analysisHTML += `<span class="point-icon">${empCountChange > 0 ? '👥' : '👤'}</span>`;
+        analysisHTML += `<strong>Employee Count:</strong> ${empCountChange > 0 ? 'Increased' : 'Decreased'} by ${Math.abs(empCountChange)} employees (${Math.abs(empCountPercentage)}%)`;
+        analysisHTML += `<br><small>From ${firstMonth.empCount} to ${lastMonth.empCount} employees</small>`;
+        analysisHTML += `</div>`;
+    } else {
+        analysisHTML += `<div class="analysis-point neutral">`;
+        analysisHTML += `<span class="point-icon">👥</span>`;
+        analysisHTML += `<strong>Employee Count:</strong> Remained stable at ${firstMonth.empCount} employees`;
+        analysisHTML += `</div>`;
+    }
+    
+    // Gross salary analysis
+    const grossChange = lastMonth.totalGross - firstMonth.totalGross;
+    if (grossChange !== 0) {
+        const grossPercentage = ((grossChange / firstMonth.totalGross) * 100).toFixed(2);
+        analysisHTML += `<div class="analysis-point ${grossChange > 0 ? 'positive' : 'negative'}">`;
+        analysisHTML += `<span class="point-icon">${grossChange > 0 ? '💰' : '💸'}</span>`;
+        analysisHTML += `<strong>Total Gross Salary:</strong> ${grossChange > 0 ? 'Increased' : 'Decreased'} by ₹${formatIndianNumber(Math.abs(grossChange))} (${Math.abs(grossPercentage)}%)`;
+        analysisHTML += `<br><small>From ₹${formatIndianNumber(firstMonth.totalGross)} to ₹${formatIndianNumber(lastMonth.totalGross)}</small>`;
+        analysisHTML += `</div>`;
+    } else {
+        analysisHTML += `<div class="analysis-point neutral">`;
+        analysisHTML += `<span class="point-icon">💰</span>`;
+        analysisHTML += `<strong>Total Gross Salary:</strong> Remained constant at ₹${formatIndianNumber(firstMonth.totalGross)}`;
+        analysisHTML += `</div>`;
+    }
+    
+    // Deductions analysis
+    const deductionsChange = lastMonth.totalDeductions - firstMonth.totalDeductions;
+    if (deductionsChange !== 0) {
+        const deductionsPercentage = ((deductionsChange / firstMonth.totalDeductions) * 100).toFixed(2);
+        analysisHTML += `<div class="analysis-point ${deductionsChange > 0 ? 'negative' : 'positive'}">`;
+        analysisHTML += `<span class="point-icon">${deductionsChange > 0 ? '⬆️' : '⬇️'}</span>`;
+        analysisHTML += `<strong>Total Deductions:</strong> ${deductionsChange > 0 ? 'Increased' : 'Decreased'} by ₹${formatIndianNumber(Math.abs(deductionsChange))} (${Math.abs(deductionsPercentage)}%)`;
+        analysisHTML += `<br><small>From ₹${formatIndianNumber(firstMonth.totalDeductions)} to ₹${formatIndianNumber(lastMonth.totalDeductions)}</small>`;
+        analysisHTML += `</div>`;
+    } else {
+        analysisHTML += `<div class="analysis-point neutral">`;
+        analysisHTML += `<span class="point-icon">⬜</span>`;
+        analysisHTML += `<strong>Total Deductions:</strong> Remained constant at ₹${formatIndianNumber(firstMonth.totalDeductions)}`;
+        analysisHTML += `</div>`;
+    }
+    
+    // Net salary analysis
+    const netChange = lastMonth.totalNet - firstMonth.totalNet;
+    if (netChange !== 0) {
+        const netPercentage = ((netChange / firstMonth.totalNet) * 100).toFixed(2);
+        analysisHTML += `<div class="analysis-point ${netChange > 0 ? 'positive' : 'negative'}">`;
+        analysisHTML += `<span class="point-icon">${netChange > 0 ? '✅' : '❌'}</span>`;
+        analysisHTML += `<strong>Total Net Salary:</strong> ${netChange > 0 ? 'Increased' : 'Decreased'} by ₹${formatIndianNumber(Math.abs(netChange))} (${Math.abs(netPercentage)}%)`;
+        analysisHTML += `<br><small>From ₹${formatIndianNumber(firstMonth.totalNet)} to ₹${formatIndianNumber(lastMonth.totalNet)}</small>`;
+        analysisHTML += `</div>`;
+    } else {
+        analysisHTML += `<div class="analysis-point neutral">`;
+        analysisHTML += `<span class="point-icon">✅</span>`;
+        analysisHTML += `<strong>Total Net Salary:</strong> Remained constant at ₹${formatIndianNumber(firstMonth.totalNet)}`;
+        analysisHTML += `</div>`;
+    }
+    
+    analysisHTML += '</div></div>';
+    return analysisHTML;
+}
+
+// Add monthly comparison details to the modal
+function addMonthlyComparisonDetails(currentYear, currentMonth, isDashboard, empNo = null) {
+    const comparisonDiv = document.getElementById('monthlyComparison');
+    if (!comparisonDiv) return;
+    
+    // Find previous month data
+    const currentMonthNumber = getMonthNumber(currentMonth);
+    let previousMonth, previousYear;
+    
+    if (currentMonthNumber === 1) {
+        previousMonth = 'December';
+        previousYear = (parseInt(currentYear) - 1).toString();
+    } else {
+        const prevMonthNumber = currentMonthNumber - 1;
+        previousMonth = Object.keys({
+            'January': 1, 'February': 2, 'March': 3, 'April': 4,
+            'May': 5, 'June': 6, 'July': 7, 'August': 8,
+            'September': 9, 'October': 10, 'November': 11, 'December': 12
+        }).find(key => getMonthNumber(key) === prevMonthNumber);
+        previousYear = currentYear;
+    }
+    
+    let comparisonHTML = '<div class="comparison-section">';
+    comparisonHTML += '<h4>📊 Monthly Comparison</h4>';
+    
+    if (isDashboard) {
+        // Dashboard comparison
+        const currentData = salaryData.filter(row => row.Year === currentYear && row.Month === currentMonth);
+        const previousData = salaryData.filter(row => row.Year === previousYear && row.Month === previousMonth);
+        
+        if (previousData.length === 0) {
+            comparisonHTML += '<p class="no-comparison">No previous month data available for comparison.</p>';
+        } else {
+            const currentGross = currentData.reduce((sum, row) => sum + row['Gross Salary'], 0);
+            const previousGross = previousData.reduce((sum, row) => sum + row['Gross Salary'], 0);
+            const currentDeductions = currentData.reduce((sum, row) => sum + row['Total Deductions'], 0);
+            const previousDeductions = previousData.reduce((sum, row) => sum + row['Total Deductions'], 0);
+            const currentNet = currentData.reduce((sum, row) => sum + row['Net Salary'], 0);
+            const previousNet = previousData.reduce((sum, row) => sum + row['Net Salary'], 0);
+            const currentEmpCount = new Set(currentData.map(row => row['EMP No'])).size;
+            const previousEmpCount = new Set(previousData.map(row => row['EMP No'])).size;
+            
+            comparisonHTML += generateComparisonRow('Employee Count', currentEmpCount, previousEmpCount, '', false);
+            comparisonHTML += generateComparisonRow('Total Gross', currentGross, previousGross, '₹');
+            comparisonHTML += generateComparisonRow('Total Deductions', currentDeductions, previousDeductions, '₹', true);
+            comparisonHTML += generateComparisonRow('Total Net', currentNet, previousNet, '₹');
+        }
+    } else {
+        // Employee comparison
+        const currentData = salaryData.find(row => row['EMP No'] === empNo && row.Year === currentYear && row.Month === currentMonth);
+        const previousData = salaryData.find(row => row['EMP No'] === empNo && row.Year === previousYear && row.Month === previousMonth);
+        
+        if (!previousData) {
+            comparisonHTML += '<p class="no-comparison">No previous month data available for comparison.</p>';
+        } else {
+            comparisonHTML += generateComparisonRow('Basic Salary', currentData['Basic'], previousData['Basic'], '₹');
+            comparisonHTML += generateComparisonRow('Gross Salary', currentData['Gross Salary'], previousData['Gross Salary'], '₹');
+            comparisonHTML += generateComparisonRow('Total Deductions', currentData['Total Deductions'], previousData['Total Deductions'], '₹', true);
+            comparisonHTML += generateComparisonRow('Net Salary', currentData['Net Salary'], previousData['Net Salary'], '₹');
+        }
+    }
+    
+    comparisonHTML += '</div>';
+    comparisonDiv.innerHTML = comparisonHTML;
+}
+
+// Generate comparison row for monthly details
+function generateComparisonRow(label, currentValue, previousValue, currency = '', isDeduction = false) {
+    const difference = currentValue - previousValue;
+    const percentageChange = previousValue !== 0 ? ((difference / previousValue) * 100).toFixed(2) : 0;
+    
+    let rowClass = 'neutral';
+    let icon = '➖';
+    let changeText = 'No change';
+    
+    if (difference !== 0) {
+        if (isDeduction) {
+            // For deductions, decrease is positive (good), increase is negative (bad)
+            rowClass = difference < 0 ? 'positive' : 'negative';
+            icon = difference < 0 ? '⬇️' : '⬆️';
+        } else {
+            // For other values, increase is positive, decrease is negative
+            rowClass = difference > 0 ? 'positive' : 'negative';
+            icon = difference > 0 ? '⬆️' : '⬇️';
+        }
+        
+        changeText = `${difference > 0 ? '+' : ''}${currency}${formatIndianNumber(Math.abs(difference))} (${difference > 0 ? '+' : ''}${percentageChange}%)`;
+    }
+    
+    return `
+        <div class="comparison-row ${rowClass}">
+            <div class="comparison-label">
+                <span class="comparison-icon">${icon}</span>
+                <strong>${label}:</strong>
+            </div>
+            <div class="comparison-values">
+                <span class="current-value">${currency}${formatIndianNumber(currentValue)}</span>
+                <span class="change-value">${changeText}</span>
+            </div>
+        </div>
+    `;
+}
+
+// Close dashboard analysis modal
+function closeDashboardAnalysisModal() {
+    dashboardAnalysisModal.classList.remove('active');
+}
+
+// Close salary analysis modal
+function closeSalaryAnalysisModal() {
+    salaryAnalysisModal.classList.remove('active');
 }
 
 // Utility function to debounce search

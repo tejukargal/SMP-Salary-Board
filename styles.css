@@ -1236,7 +1236,7 @@ tr:hover {
 }
 
 .month-btn.month-january { background: linear-gradient(135deg, #FF6B8A, #FF4567); }
-.month-btn.month-february { background: linear-gradient(135deg, #FF8A65, #FF5722); }
+.month-btn.month-february { background: linear-gradient(135deg, #2E7D32, #1B5E20); }
 .month-btn.month-march { background: linear-gradient(135deg, #FFD54F, #FFC107); }
 .month-btn.month-april { background: linear-gradient(135deg, #81C784, #4CAF50); }
 .month-btn.month-may { background: linear-gradient(135deg, #64B5F6, #2196F3); }
@@ -1255,6 +1255,10 @@ tr:hover {
 
 [data-theme="dark"] .month-btn:hover {
     opacity: 1;
+}
+
+[data-theme="dark"] .month-btn.month-february {
+    background: linear-gradient(135deg, #4CAF50, #2E7D32);
 }
 
 /* Salary Analysis Modal Styles */

@@ -597,7 +597,7 @@ function closeModal() {
 // Get month number for sorting
 function getMonthNumber(monthName) {
     const months = {
-        'January': 1, 'February': 2, 'March': 3, 'April': 4,
+        'January': 1, 'February': 2, 'Feburary': 2, 'March': 3, 'April': 4,
         'May': 5, 'June': 6, 'July': 7, 'August': 8,
         'September': 9, 'October': 10, 'November': 11, 'December': 12
     };
@@ -714,6 +714,7 @@ function getMonthClass(monthName) {
     const monthClasses = {
         'January': 'month-january',
         'February': 'month-february',
+        'Feburary': 'month-february', // Handle misspelled February
         'March': 'month-march',
         'April': 'month-april',
         'May': 'month-may',

@@ -471,28 +471,62 @@
                     
                     <div class="column-selection">
                         <h4>Select Columns to Export</h4>
-                        <div class="column-checkboxes">
-                            <label><input type="checkbox" id="col-employee" checked> Employee Details</label>
-                            <label><input type="checkbox" id="col-month" checked> Month</label>
-                            <label><input type="checkbox" id="col-year" checked> Year</label>
-                            <label><input type="checkbox" id="col-basic" checked> Basic</label>
-                            <label><input type="checkbox" id="col-da" checked> DA</label>
-                            <label><input type="checkbox" id="col-hra" checked> HRA</label>
-                            <label><input type="checkbox" id="col-ir" checked> IR</label>
-                            <label><input type="checkbox" id="col-sfn" checked> SFN</label>
-                            <label><input type="checkbox" id="col-spay" checked> SPAY-TYPIST</label>
-                            <label><input type="checkbox" id="col-p" checked> P</label>
-                            <label><input type="checkbox" id="col-gross" checked> Gross Salary</label>
-                            <label><input type="checkbox" id="col-it" checked> IT</label>
-                            <label><input type="checkbox" id="col-pt" checked> PT</label>
-                            <label><input type="checkbox" id="col-gslic" checked> GSLIC</label>
-                            <label><input type="checkbox" id="col-lic" checked> LIC</label>
-                            <label><input type="checkbox" id="col-fbf" checked> FBF</label>
-                            <label><input type="checkbox" id="col-deductions" checked> Total Deductions</label>
-                            <label><input type="checkbox" id="col-net" checked> Net Salary</label>
-                            <label><input type="checkbox" id="col-bank" checked> Bank Account</label>
-                            <label><input type="checkbox" id="col-increment" checked> Next Increment Date</label>
+                        
+                        <!-- Basic Information -->
+                        <div class="column-category">
+                            <h5>Basic Information</h5>
+                            <div class="column-checkboxes">
+                                <label><input type="checkbox" id="col-employee" checked> Employee Details</label>
+                                <label><input type="checkbox" id="col-month" checked> Month</label>
+                                <label><input type="checkbox" id="col-year" checked> Year</label>
+                                <label><input type="checkbox" id="col-basic" checked> Basic</label>
+                            </div>
                         </div>
+                        
+                        <!-- Allowances -->
+                        <div class="column-category">
+                            <h5>Allowances</h5>
+                            <div class="column-checkboxes">
+                                <label><input type="checkbox" id="col-da" checked> DA</label>
+                                <label><input type="checkbox" id="col-hra" checked> HRA</label>
+                                <label><input type="checkbox" id="col-ir" checked> IR</label>
+                                <label><input type="checkbox" id="col-sfn" checked> SFN</label>
+                                <label><input type="checkbox" id="col-spay" checked> SPAY-TYPIST</label>
+                                <label><input type="checkbox" id="col-p" checked> P</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Deductions -->
+                        <div class="column-category">
+                            <h5>Deductions</h5>
+                            <div class="column-checkboxes">
+                                <label><input type="checkbox" id="col-it" checked> IT</label>
+                                <label><input type="checkbox" id="col-pt" checked> PT</label>
+                                <label><input type="checkbox" id="col-gslic" checked> GSLIC</label>
+                                <label><input type="checkbox" id="col-lic" checked> LIC</label>
+                                <label><input type="checkbox" id="col-fbf" checked> FBF</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Gross & Net -->
+                        <div class="column-category">
+                            <h5>Gross & Net</h5>
+                            <div class="column-checkboxes">
+                                <label><input type="checkbox" id="col-gross" checked> Gross Salary</label>
+                                <label><input type="checkbox" id="col-deductions" checked> Total Deductions</label>
+                                <label><input type="checkbox" id="col-net" checked> Net Salary</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Information -->
+                        <div class="column-category">
+                            <h5>Additional Information</h5>
+                            <div class="column-checkboxes">
+                                <label><input type="checkbox" id="col-bank" checked> Bank Account</label>
+                                <label><input type="checkbox" id="col-increment" checked> Next Increment Date</label>
+                            </div>
+                        </div>
+                        
                         <div class="column-controls">
                             <button id="selectAllColumns" class="btn-secondary">Select All</button>
                             <button id="clearAllColumns" class="btn-secondary">Clear All</button>

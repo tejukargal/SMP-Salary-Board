@@ -1417,7 +1417,12 @@ function exportToPDF() {
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
         script.onload = () => {
-            generatePDF(selectedColumns, filteredData);
+            setTimeout(() => {
+                generatePDF(selectedColumns, filteredData);
+            }, 100);
+        };
+        script.onerror = () => {
+            alert('Failed to load PDF library. Please try again.');
         };
         document.head.appendChild(script);
     } else {
@@ -1426,111 +1431,120 @@ function exportToPDF() {
 }
 
 function generatePDF(selectedColumns, filteredData) {
-    const { jsPDF } = window.jsPDF;
-    
-    const columnMapping = {
-        'employee': ['Name', 'EMP No', 'Designation', 'Group'],
-        'month': ['Month'],
-        'year': ['Year'],
-        'basic': ['Basic'],
-        'da': ['DA'],
-        'hra': ['HRA'],
-        'ir': ['IR'],
-        'sfn': ['SFN'],
-        'spay': ['SPAY-TYPIST'],
-        'p': ['P'],
-        'gross': ['Gross Salary'],
-        'it': ['IT'],
-        'pt': ['PT'],
-        'gslic': ['GSLIC'],
-        'lic': ['LIC'],
-        'fbf': ['FBF'],
-        'deductions': ['Total Deductions'],
-        'net': ['Net Salary'],
-        'bank': ['Bank A/C Number'],
-        'increment': ['Next Increment Date']
-    };
-    
-    // Build headers array
-    let headers = [];
-    selectedColumns.forEach(col => {
-        if (columnMapping[col]) {
-            headers.push(...columnMapping[col]);
-        }
-    });
-    
-    // Determine orientation based on number of columns
-    const orientation = headers.length > 8 ? 'landscape' : 'portrait';
-    const pdf = new jsPDF(orientation, 'pt', 'a4');
-    
-    // PDF configuration
-    const pageWidth = orientation === 'landscape' ? 842 : 595;
-    const pageHeight = orientation === 'landscape' ? 595 : 842;
-    const margin = 40;
-    const tableWidth = pageWidth - 2 * margin;
-    
-    // Add title
-    pdf.setFontSize(16);
-    pdf.text('SMP Salary Board - Export Report', margin, margin + 20);
-    pdf.setFontSize(12);
-    pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, margin, margin + 45);
-    
-    // Prepare table data
-    const tableData = [];
-    filteredData.forEach(row => {
-        const rowData = headers.map(header => {
-            const value = row[header] || '';
-            return value.toString();
-        });
-        tableData.push(rowData);
-    });
-    
-    // Calculate column widths
-    const columnWidth = tableWidth / headers.length;
-    
-    // Add table
-    let yPosition = margin + 80;
-    const rowHeight = 25;
-    const headerHeight = 30;
-    
-    // Draw header
-    pdf.setFillColor(124, 141, 181);
-    pdf.rect(margin, yPosition, tableWidth, headerHeight, 'F');
-    pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(8);
-    
-    headers.forEach((header, index) => {
-        const xPosition = margin + index * columnWidth;
-        pdf.text(header, xPosition + 5, yPosition + headerHeight / 2, { baseline: 'middle' });
-    });
-    
-    yPosition += headerHeight;
-    pdf.setTextColor(0, 0, 0);
-    
-    // Draw data rows
-    tableData.forEach((row, rowIndex) => {
-        if (yPosition + rowHeight > pageHeight - margin) {
-            pdf.addPage();
-            yPosition = margin + 20;
+    try {
+        const { jsPDF } = window.jsPDF || window;
+        
+        if (!jsPDF) {
+            alert('PDF library not loaded. Please try again.');
+            return;
         }
         
-        // Alternate row colors
-        if (rowIndex % 2 === 0) {
-            pdf.setFillColor(248, 249, 250);
-            pdf.rect(margin, yPosition, tableWidth, rowHeight, 'F');
-        }
+        const columnMapping = {
+            'employee': ['Name', 'EMP No', 'Designation', 'Group'],
+            'month': ['Month'],
+            'year': ['Year'],
+            'basic': ['Basic'],
+            'da': ['DA'],
+            'hra': ['HRA'],
+            'ir': ['IR'],
+            'sfn': ['SFN'],
+            'spay': ['SPAY-TYPIST'],
+            'p': ['P'],
+            'gross': ['Gross Salary'],
+            'it': ['IT'],
+            'pt': ['PT'],
+            'gslic': ['GSLIC'],
+            'lic': ['LIC'],
+            'fbf': ['FBF'],
+            'deductions': ['Total Deductions'],
+            'net': ['Net Salary'],
+            'bank': ['Bank A/C Number'],
+            'increment': ['Next Increment Date']
+        };
         
-        row.forEach((cell, cellIndex) => {
-            const xPosition = margin + cellIndex * columnWidth;
-            pdf.text(cell, xPosition + 5, yPosition + rowHeight / 2, { baseline: 'middle' });
+        // Build headers array
+        let headers = [];
+        selectedColumns.forEach(col => {
+            if (columnMapping[col]) {
+                headers.push(...columnMapping[col]);
+            }
         });
         
-        yPosition += rowHeight;
-    });
-    
-    // Save PDF
-    const filename = `salary_data_${new Date().toISOString().split('T')[0]}.pdf`;
-    pdf.save(filename);
-    
-    alert(`PDF exported successfully as ${filename}`);
+        // Determine orientation based on number of columns
+        const orientation = headers.length > 8 ? 'landscape' : 'portrait';
+        const pdf = new jsPDF({
+            orientation: orientation,
+            unit: 'pt',
+            format: 'a4'
+        });
+        
+        // PDF configuration
+        const pageWidth = orientation === 'landscape' ? 842 : 595;
+        const pageHeight = orientation === 'landscape' ? 595 : 842;
+        const margin = 40;
+        const tableWidth = pageWidth - 2 * margin;
+        
+        // Add title
+        pdf.setFontSize(16);
+        pdf.text('SMP Salary Board - Export Report', margin, margin + 20);
+        pdf.setFontSize(12);
+        pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, margin, margin + 45);
+        
+        // Calculate column widths
+        const columnWidth = Math.max(50, tableWidth / headers.length);
+        
+        // Add table
+        let yPosition = margin + 80;
+        const rowHeight = 20;
+        const headerHeight = 25;
+        
+        // Draw header
+        pdf.setFillColor(124, 141, 181);
+        pdf.rect(margin, yPosition, tableWidth, headerHeight, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(orientation === 'landscape' ? 7 : 9);
+        
+        headers.forEach((header, index) => {
+            const xPosition = margin + index * columnWidth;
+            const text = header.length > 12 ? header.substring(0, 12) + '...' : header;
+            pdf.text(text, xPosition + 3, yPosition + headerHeight / 2 + 3);
+        });
+        
+        yPosition += headerHeight;
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(orientation === 'landscape' ? 6 : 8);
+        
+        // Draw data rows
+        filteredData.forEach((row, rowIndex) => {
+            if (yPosition + rowHeight > pageHeight - margin) {
+                pdf.addPage();
+                yPosition = margin + 20;
+            }
+            
+            // Alternate row colors
+            if (rowIndex % 2 === 0) {
+                pdf.setFillColor(248, 249, 250);
+                pdf.rect(margin, yPosition, tableWidth, rowHeight, 'F');
+            }
+            
+            headers.forEach((header, cellIndex) => {
+                const xPosition = margin + cellIndex * columnWidth;
+                const cellValue = row[header] || '';
+                const text = cellValue.toString();
+                const truncatedText = text.length > 15 ? text.substring(0, 15) + '...' : text;
+                pdf.text(truncatedText, xPosition + 3, yPosition + rowHeight / 2 + 3);
+            });
+            
+            yPosition += rowHeight;
+        });
+        
+        // Save PDF
+        const filename = `salary_data_${new Date().toISOString().split('T')[0]}.pdf`;
+        pdf.save(filename);
+        
+        alert(`PDF exported successfully as ${filename}`);
+    } catch (error) {
+        console.error('PDF generation error:', error);
+        alert('Error generating PDF. Please try again.');
+    }
 }

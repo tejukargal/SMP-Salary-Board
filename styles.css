@@ -429,6 +429,28 @@ body {
 
 .table-wrapper {
     overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    position: relative;
+}
+
+/* Improved table scrolling */
+.table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: var(--background-tertiary);
+    border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--border-hover);
 }
 
 /* Enhanced mobile table width */
@@ -439,7 +461,7 @@ body {
     }
     
     table {
-        min-width: 350px;
+        min-width: 600px;
         width: 100%;
     }
 }
@@ -453,7 +475,9 @@ body {
 
 table {
     width: 100%;
+    min-width: 800px;
     border-collapse: collapse;
+    table-layout: fixed;
 }
 
 th, td {
@@ -1521,11 +1545,13 @@ table th:nth-child(2) {
 /* Enhanced mobile table header spacing */
 @media (max-width: 480px) {
     .table-wrapper {
-        min-width: 380px;
+        min-width: 320px;
+        overflow-x: auto;
     }
     
     table {
-        min-width: 380px;
+        min-width: 800px;
+        table-layout: auto;
     }
     
     th {
@@ -1591,9 +1617,42 @@ table th:nth-child(2) {
     font-size: 0.9rem;
 }
 
+.column-category {
+    margin-bottom: var(--spacing-lg);
+}
+
+.column-category h5 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.column-category:nth-child(2) h5 { /* Basic Information */
+    border-bottom-color: var(--primary-color);
+}
+
+.column-category:nth-child(3) h5 { /* Allowances */
+    border-bottom-color: var(--success-color);
+}
+
+.column-category:nth-child(4) h5 { /* Deductions */
+    border-bottom-color: var(--danger-color);
+}
+
+.column-category:nth-child(5) h5 { /* Gross & Net */
+    border-bottom-color: var(--accent-color);
+}
+
+.column-category:nth-child(6) h5 { /* Additional Information */
+    border-bottom-color: var(--warning-color);
+}
+
 .column-checkboxes {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
     padding: var(--spacing-md);
@@ -1644,7 +1703,7 @@ table th:nth-child(2) {
     }
     
     .column-checkboxes {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     }
     
     .column-controls {
@@ -1660,6 +1719,7 @@ table th:nth-child(2) {
     
     .column-checkboxes {
         padding: var(--spacing-sm);
+        grid-template-columns: 1fr;
     }
     
     .column-checkboxes label {

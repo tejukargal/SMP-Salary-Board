@@ -41,6 +41,11 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         if (typeof window.jsPDF !== 'undefined') {
             console.log('jsPDF library loaded successfully');
+            if (window.jsPDF.jsPDF) {
+                console.log('jsPDF constructor found');
+            } else {
+                console.warn('jsPDF constructor not found');
+            }
         } else {
             console.warn('jsPDF library not detected');
         }
@@ -1421,35 +1426,60 @@ function exportToPDF() {
         return;
     }
     
-    // Check if jsPDF is available with a delay to allow loading
-    setTimeout(() => {
-        if (typeof window.jsPDF !== 'undefined') {
-            generatePDF(selectedColumns, filteredData);
-        } else {
-            alert('PDF library is still loading. Please wait a moment and try again.');
-        }
-    }, 500);
+    // Debug logging
+    console.log('Checking jsPDF availability...');
+    console.log('window.jsPDF:', typeof window.jsPDF);
+    console.log('window.jsPDF object:', window.jsPDF);
+    
+    // Try to load jsPDF if not available
+    if (typeof window.jsPDF === 'undefined') {
+        console.log('jsPDF not found, attempting to load...');
+        loadJsPDFAndExport(selectedColumns, filteredData);
+    } else {
+        console.log('jsPDF found, generating PDF...');
+        generatePDF(selectedColumns, filteredData);
+    }
+}
+
+function loadJsPDFAndExport(selectedColumns, filteredData) {
+    // Create a new script element
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload = function() {
+        setTimeout(() => {
+            if (typeof window.jsPDF !== 'undefined') {
+                generatePDF(selectedColumns, filteredData);
+            } else {
+                alert('Failed to load PDF library. Please try refreshing the page.');
+            }
+        }, 100);
+    };
+    script.onerror = function() {
+        alert('Failed to load PDF library. Please check your internet connection and try again.');
+    };
+    document.head.appendChild(script);
 }
 
 function generatePDF(selectedColumns, filteredData) {
     try {
-        // Try multiple ways to access jsPDF
+        // Try different ways to access jsPDF
         let jsPDF = null;
         
         if (window.jsPDF && window.jsPDF.jsPDF) {
             jsPDF = window.jsPDF.jsPDF;
+            console.log('Using window.jsPDF.jsPDF');
         } else if (window.jsPDF) {
             jsPDF = window.jsPDF;
-        } else if (window.jspdf && window.jspdf.jsPDF) {
-            jsPDF = window.jspdf.jsPDF;
+            console.log('Using window.jsPDF');
         } else if (typeof jsPDF !== 'undefined') {
-            // Global jsPDF variable
             jsPDF = jsPDF;
+            console.log('Using global jsPDF');
         }
         
         if (!jsPDF) {
-            console.log('Available window objects:', Object.keys(window).filter(k => k.toLowerCase().includes('pdf')));
-            alert('PDF library not loaded correctly. Please refresh the page and try again.');
+            console.error('jsPDF not found in any expected location');
+            console.log('Available window properties:', Object.keys(window).filter(k => k.toLowerCase().includes('pdf')));
+            fallbackCSVExport(selectedColumns, filteredData);
             return;
         }
         
@@ -1559,6 +1589,68 @@ function generatePDF(selectedColumns, filteredData) {
         alert(`PDF exported successfully as ${filename}`);
     } catch (error) {
         console.error('PDF generation error:', error);
-        alert('Error generating PDF. Please try again.');
+        alert('Error generating PDF. Falling back to CSV export.');
+        fallbackCSVExport(selectedColumns, filteredData);
     }
+}
+
+// Fallback function when PDF fails
+function fallbackCSVExport(selectedColumns, filteredData) {
+    alert('PDF export failed. Exporting as CSV instead.');
+    
+    // Use the existing CSV export functionality
+    const columnMapping = {
+        'employee': ['Name', 'EMP No', 'Designation', 'Group'],
+        'month': ['Month'],
+        'year': ['Year'],
+        'basic': ['Basic'],
+        'da': ['DA'],
+        'hra': ['HRA'],
+        'ir': ['IR'],
+        'sfn': ['SFN'],
+        'spay': ['SPAY-TYPIST'],
+        'p': ['P'],
+        'gross': ['Gross Salary'],
+        'it': ['IT'],
+        'pt': ['PT'],
+        'gslic': ['GSLIC'],
+        'lic': ['LIC'],
+        'fbf': ['FBF'],
+        'deductions': ['Total Deductions'],
+        'net': ['Net Salary'],
+        'bank': ['Bank A/C Number'],
+        'increment': ['Next Increment Date']
+    };
+    
+    // Build headers array
+    let headers = [];
+    selectedColumns.forEach(col => {
+        if (columnMapping[col]) {
+            headers.push(...columnMapping[col]);
+        }
+    });
+    
+    // Build CSV content
+    let csvContent = headers.join(',') + '\n';
+    
+    filteredData.forEach(row => {
+        const values = headers.map(header => {
+            const value = row[header] || '';
+            return `"${value.toString().replace(/"/g, '""')}"`;
+        });
+        csvContent += values.join(',') + '\n';
+    });
+    
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    
+    const filename = `salary_data_fallback_${new Date().toISOString().split('T')[0]}.csv`;
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }

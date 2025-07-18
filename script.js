@@ -36,6 +36,15 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     initializeTheme();
     showView('dashboard');
+    
+    // Check if jsPDF is loaded
+    setTimeout(() => {
+        if (typeof window.jsPDF !== 'undefined') {
+            console.log('jsPDF library loaded successfully');
+        } else {
+            console.warn('jsPDF library not detected');
+        }
+    }, 1000);
 });
 
 // Setup event listeners
@@ -1412,30 +1421,35 @@ function exportToPDF() {
         return;
     }
     
-    // Load jsPDF library if not already loaded
-    if (typeof window.jsPDF === 'undefined') {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-        script.onload = () => {
-            setTimeout(() => {
-                generatePDF(selectedColumns, filteredData);
-            }, 100);
-        };
-        script.onerror = () => {
-            alert('Failed to load PDF library. Please try again.');
-        };
-        document.head.appendChild(script);
-    } else {
-        generatePDF(selectedColumns, filteredData);
-    }
+    // Check if jsPDF is available with a delay to allow loading
+    setTimeout(() => {
+        if (typeof window.jsPDF !== 'undefined') {
+            generatePDF(selectedColumns, filteredData);
+        } else {
+            alert('PDF library is still loading. Please wait a moment and try again.');
+        }
+    }, 500);
 }
 
 function generatePDF(selectedColumns, filteredData) {
     try {
-        const { jsPDF } = window.jsPDF || window;
+        // Try multiple ways to access jsPDF
+        let jsPDF = null;
+        
+        if (window.jsPDF && window.jsPDF.jsPDF) {
+            jsPDF = window.jsPDF.jsPDF;
+        } else if (window.jsPDF) {
+            jsPDF = window.jsPDF;
+        } else if (window.jspdf && window.jspdf.jsPDF) {
+            jsPDF = window.jspdf.jsPDF;
+        } else if (typeof jsPDF !== 'undefined') {
+            // Global jsPDF variable
+            jsPDF = jsPDF;
+        }
         
         if (!jsPDF) {
-            alert('PDF library not loaded. Please try again.');
+            console.log('Available window objects:', Object.keys(window).filter(k => k.toLowerCase().includes('pdf')));
+            alert('PDF library not loaded correctly. Please refresh the page and try again.');
             return;
         }
         

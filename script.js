@@ -25,7 +25,7 @@ const backToAdminBtn = document.getElementById('backToAdminBtn');
 const salaryAnalysisBtn = document.getElementById('salaryAnalysisBtn');
 const salaryAnalysisModal = document.getElementById('salaryAnalysisModal');
 const closeAnalysisModalBtn = document.getElementById('closeAnalysisModal');
-const dashboardAnalysisBtn = document.getElementById('dashboardAnalysisBtn');
+// const dashboardAnalysisBtn = document.getElementById('dashboardAnalysisBtn'); // Removed
 const dashboardAnalysisModal = document.getElementById('dashboardAnalysisModal');
 const closeDashboardAnalysisModalBtn = document.getElementById('closeDashboardAnalysisModal');
 let cameFromAdmin = false;
@@ -63,9 +63,9 @@ function setupEventListeners() {
     if (closeAnalysisModalBtn) {
         closeAnalysisModalBtn.addEventListener('click', closeSalaryAnalysisModal);
     }
-    if (dashboardAnalysisBtn) {
-        dashboardAnalysisBtn.addEventListener('click', showDashboardAnalysis);
-    }
+    // if (dashboardAnalysisBtn) {
+    //     dashboardAnalysisBtn.addEventListener('click', showDashboardAnalysis);
+    // }
     if (closeDashboardAnalysisModalBtn) {
         closeDashboardAnalysisModalBtn.addEventListener('click', closeDashboardAnalysisModal);
     }
@@ -122,8 +122,48 @@ function setupEventListeners() {
             if (dashboardAnalysisModal && dashboardAnalysisModal.classList.contains('active')) {
                 closeDashboardAnalysisModal();
             }
+            if (document.getElementById('exportModal') && document.getElementById('exportModal').classList.contains('active')) {
+                closeExportModal();
+            }
         }
     });
+
+    // Export functionality event listeners
+    const exportMenuBtn = document.getElementById('exportMenuBtn');
+    const exportModal = document.getElementById('exportModal');
+    const closeExportModalBtn = document.getElementById('closeExportModal');
+    const exportCSVBtn = document.getElementById('exportCSV');
+    const exportPDFBtn = document.getElementById('exportPDF');
+    const selectAllColumnsBtn = document.getElementById('selectAllColumns');
+    const clearAllColumnsBtn = document.getElementById('clearAllColumns');
+
+    if (exportMenuBtn) {
+        exportMenuBtn.addEventListener('click', showExportModal);
+    }
+    if (closeExportModalBtn) {
+        closeExportModalBtn.addEventListener('click', closeExportModal);
+    }
+    if (exportCSVBtn) {
+        exportCSVBtn.addEventListener('click', exportToCSV);
+    }
+    if (exportPDFBtn) {
+        exportPDFBtn.addEventListener('click', exportToPDF);
+    }
+    if (selectAllColumnsBtn) {
+        selectAllColumnsBtn.addEventListener('click', selectAllColumns);
+    }
+    if (clearAllColumnsBtn) {
+        clearAllColumnsBtn.addEventListener('click', clearAllColumns);
+    }
+    
+    // Close export modal when clicking outside
+    if (exportModal) {
+        exportModal.addEventListener('click', (e) => {
+            if (e.target === exportModal) {
+                closeExportModal();
+            }
+        });
+    }
 }
 
 // Theme Management
@@ -1210,4 +1250,287 @@ function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
+}
+
+// Export Modal Functions
+function showExportModal() {
+    const exportModal = document.getElementById('exportModal');
+    if (exportModal) {
+        populateExportFilters();
+        exportModal.classList.add('active');
+    }
+}
+
+function closeExportModal() {
+    const exportModal = document.getElementById('exportModal');
+    if (exportModal) {
+        exportModal.classList.remove('active');
+    }
+}
+
+function populateExportFilters() {
+    const exportYearFilter = document.getElementById('exportYearFilter');
+    const exportMonthFilter = document.getElementById('exportMonthFilter');
+    
+    if (exportYearFilter && exportMonthFilter) {
+        // Clear existing options except the first one
+        exportYearFilter.innerHTML = '<option value="">All Years</option>';
+        exportMonthFilter.innerHTML = '<option value="">All Months</option>';
+        
+        // Get unique years and months from data
+        const years = [...new Set(salaryData.map(item => item.Year))].sort((a, b) => b - a);
+        const months = [...new Set(salaryData.map(item => item.Month))];
+        
+        years.forEach(year => {
+            exportYearFilter.innerHTML += `<option value="${year}">${year}</option>`;
+        });
+        
+        months.forEach(month => {
+            exportMonthFilter.innerHTML += `<option value="${month}">${month}</option>`;
+        });
+    }
+}
+
+function selectAllColumns() {
+    const checkboxes = document.querySelectorAll('#exportModal .column-checkboxes input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+}
+
+function clearAllColumns() {
+    const checkboxes = document.querySelectorAll('#exportModal .column-checkboxes input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+}
+
+function getSelectedColumns() {
+    const checkboxes = document.querySelectorAll('#exportModal .column-checkboxes input[type="checkbox"]:checked');
+    return Array.from(checkboxes).map(checkbox => checkbox.id.replace('col-', ''));
+}
+
+function getFilteredExportData() {
+    const exportYearFilter = document.getElementById('exportYearFilter').value;
+    const exportMonthFilter = document.getElementById('exportMonthFilter').value;
+    
+    let filteredData = [...salaryData];
+    
+    if (exportYearFilter) {
+        filteredData = filteredData.filter(item => item.Year === exportYearFilter);
+    }
+    
+    if (exportMonthFilter) {
+        filteredData = filteredData.filter(item => item.Month === exportMonthFilter);
+    }
+    
+    return filteredData;
+}
+
+function exportToCSV() {
+    const selectedColumns = getSelectedColumns();
+    if (selectedColumns.length === 0) {
+        alert('Please select at least one column to export.');
+        return;
+    }
+    
+    const filteredData = getFilteredExportData();
+    if (filteredData.length === 0) {
+        alert('No data available for the selected filters.');
+        return;
+    }
+    
+    const columnMapping = {
+        'employee': ['Name', 'EMP No', 'Designation', 'Group'],
+        'month': ['Month'],
+        'year': ['Year'],
+        'basic': ['Basic'],
+        'da': ['DA'],
+        'hra': ['HRA'],
+        'ir': ['IR'],
+        'sfn': ['SFN'],
+        'spay': ['SPAY-TYPIST'],
+        'p': ['P'],
+        'gross': ['Gross Salary'],
+        'it': ['IT'],
+        'pt': ['PT'],
+        'gslic': ['GSLIC'],
+        'lic': ['LIC'],
+        'fbf': ['FBF'],
+        'deductions': ['Total Deductions'],
+        'net': ['Net Salary'],
+        'bank': ['Bank A/C Number'],
+        'increment': ['Next Increment Date']
+    };
+    
+    // Build headers array
+    let headers = [];
+    selectedColumns.forEach(col => {
+        if (columnMapping[col]) {
+            headers.push(...columnMapping[col]);
+        }
+    });
+    
+    // Build CSV content
+    let csvContent = headers.join(',') + '\n';
+    
+    filteredData.forEach(row => {
+        const values = headers.map(header => {
+            const value = row[header] || '';
+            // Escape commas and quotes in CSV
+            return `"${value.toString().replace(/"/g, '""')}"`;
+        });
+        csvContent += values.join(',') + '\n';
+    });
+    
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    
+    const filename = `salary_data_${new Date().toISOString().split('T')[0]}.csv`;
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    alert(`CSV exported successfully as ${filename}`);
+}
+
+function exportToPDF() {
+    const selectedColumns = getSelectedColumns();
+    if (selectedColumns.length === 0) {
+        alert('Please select at least one column to export.');
+        return;
+    }
+    
+    const filteredData = getFilteredExportData();
+    if (filteredData.length === 0) {
+        alert('No data available for the selected filters.');
+        return;
+    }
+    
+    // Load jsPDF library if not already loaded
+    if (typeof window.jsPDF === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = () => {
+            generatePDF(selectedColumns, filteredData);
+        };
+        document.head.appendChild(script);
+    } else {
+        generatePDF(selectedColumns, filteredData);
+    }
+}
+
+function generatePDF(selectedColumns, filteredData) {
+    const { jsPDF } = window.jsPDF;
+    
+    const columnMapping = {
+        'employee': ['Name', 'EMP No', 'Designation', 'Group'],
+        'month': ['Month'],
+        'year': ['Year'],
+        'basic': ['Basic'],
+        'da': ['DA'],
+        'hra': ['HRA'],
+        'ir': ['IR'],
+        'sfn': ['SFN'],
+        'spay': ['SPAY-TYPIST'],
+        'p': ['P'],
+        'gross': ['Gross Salary'],
+        'it': ['IT'],
+        'pt': ['PT'],
+        'gslic': ['GSLIC'],
+        'lic': ['LIC'],
+        'fbf': ['FBF'],
+        'deductions': ['Total Deductions'],
+        'net': ['Net Salary'],
+        'bank': ['Bank A/C Number'],
+        'increment': ['Next Increment Date']
+    };
+    
+    // Build headers array
+    let headers = [];
+    selectedColumns.forEach(col => {
+        if (columnMapping[col]) {
+            headers.push(...columnMapping[col]);
+        }
+    });
+    
+    // Determine orientation based on number of columns
+    const orientation = headers.length > 8 ? 'landscape' : 'portrait';
+    const pdf = new jsPDF(orientation, 'pt', 'a4');
+    
+    // PDF configuration
+    const pageWidth = orientation === 'landscape' ? 842 : 595;
+    const pageHeight = orientation === 'landscape' ? 595 : 842;
+    const margin = 40;
+    const tableWidth = pageWidth - 2 * margin;
+    
+    // Add title
+    pdf.setFontSize(16);
+    pdf.text('SMP Salary Board - Export Report', margin, margin + 20);
+    pdf.setFontSize(12);
+    pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, margin, margin + 45);
+    
+    // Prepare table data
+    const tableData = [];
+    filteredData.forEach(row => {
+        const rowData = headers.map(header => {
+            const value = row[header] || '';
+            return value.toString();
+        });
+        tableData.push(rowData);
+    });
+    
+    // Calculate column widths
+    const columnWidth = tableWidth / headers.length;
+    
+    // Add table
+    let yPosition = margin + 80;
+    const rowHeight = 25;
+    const headerHeight = 30;
+    
+    // Draw header
+    pdf.setFillColor(124, 141, 181);
+    pdf.rect(margin, yPosition, tableWidth, headerHeight, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(8);
+    
+    headers.forEach((header, index) => {
+        const xPosition = margin + index * columnWidth;
+        pdf.text(header, xPosition + 5, yPosition + headerHeight / 2, { baseline: 'middle' });
+    });
+    
+    yPosition += headerHeight;
+    pdf.setTextColor(0, 0, 0);
+    
+    // Draw data rows
+    tableData.forEach((row, rowIndex) => {
+        if (yPosition + rowHeight > pageHeight - margin) {
+            pdf.addPage();
+            yPosition = margin + 20;
+        }
+        
+        // Alternate row colors
+        if (rowIndex % 2 === 0) {
+            pdf.setFillColor(248, 249, 250);
+            pdf.rect(margin, yPosition, tableWidth, rowHeight, 'F');
+        }
+        
+        row.forEach((cell, cellIndex) => {
+            const xPosition = margin + cellIndex * columnWidth;
+            pdf.text(cell, xPosition + 5, yPosition + rowHeight / 2, { baseline: 'middle' });
+        });
+        
+        yPosition += rowHeight;
+    });
+    
+    // Save PDF
+    const filename = `salary_data_${new Date().toISOString().split('T')[0]}.pdf`;
+    pdf.save(filename);
+    
+    alert(`PDF exported successfully as ${filename}`);
 }

@@ -89,10 +89,6 @@
                     <div class="table-header">
                         <h3>Salary Summary</h3>
                         <div class="table-actions">
-                            <button id="dashboardAnalysisBtn" class="btn-primary">
-                                <span class="material-icons">analytics</span>
-                                Summary
-                            </button>
                             <div class="filter-group">
                                 <label for="yearFilter">Year:</label>
                                 <select id="yearFilter">
@@ -164,6 +160,10 @@
                 <div class="page-header">
                     <h2>Employee Directory</h2>
                     <div class="header-actions">
+                        <button id="exportMenuBtn" class="btn-primary">
+                            <span class="material-icons">file_download</span>
+                            Export Data
+                        </button>
                         <button id="adminLogoutBtn" class="btn-secondary">
                             <span class="material-icons">logout</span>
                             Logout
@@ -439,6 +439,77 @@
             </div>
             <div class="modal-footer">
                 <button id="closeDashboardAnalysisModal" class="btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options Modal -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Data Options</h3>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <div class="export-filters">
+                        <h4>Filter Data</h4>
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label for="exportYearFilter">Year:</label>
+                                <select id="exportYearFilter">
+                                    <option value="">All Years</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="exportMonthFilter">Month:</label>
+                                <select id="exportMonthFilter">
+                                    <option value="">All Months</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="column-selection">
+                        <h4>Select Columns to Export</h4>
+                        <div class="column-checkboxes">
+                            <label><input type="checkbox" id="col-employee" checked> Employee Details</label>
+                            <label><input type="checkbox" id="col-month" checked> Month</label>
+                            <label><input type="checkbox" id="col-year" checked> Year</label>
+                            <label><input type="checkbox" id="col-basic" checked> Basic</label>
+                            <label><input type="checkbox" id="col-da" checked> DA</label>
+                            <label><input type="checkbox" id="col-hra" checked> HRA</label>
+                            <label><input type="checkbox" id="col-ir" checked> IR</label>
+                            <label><input type="checkbox" id="col-sfn" checked> SFN</label>
+                            <label><input type="checkbox" id="col-spay" checked> SPAY-TYPIST</label>
+                            <label><input type="checkbox" id="col-p" checked> P</label>
+                            <label><input type="checkbox" id="col-gross" checked> Gross Salary</label>
+                            <label><input type="checkbox" id="col-it" checked> IT</label>
+                            <label><input type="checkbox" id="col-pt" checked> PT</label>
+                            <label><input type="checkbox" id="col-gslic" checked> GSLIC</label>
+                            <label><input type="checkbox" id="col-lic" checked> LIC</label>
+                            <label><input type="checkbox" id="col-fbf" checked> FBF</label>
+                            <label><input type="checkbox" id="col-deductions" checked> Total Deductions</label>
+                            <label><input type="checkbox" id="col-net" checked> Net Salary</label>
+                            <label><input type="checkbox" id="col-bank" checked> Bank Account</label>
+                            <label><input type="checkbox" id="col-increment" checked> Next Increment Date</label>
+                        </div>
+                        <div class="column-controls">
+                            <button id="selectAllColumns" class="btn-secondary">Select All</button>
+                            <button id="clearAllColumns" class="btn-secondary">Clear All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="exportCSV" class="btn-primary">
+                    <span class="material-icons">file_download</span>
+                    Export CSV
+                </button>
+                <button id="exportPDF" class="btn-primary">
+                    <span class="material-icons">picture_as_pdf</span>
+                    Export PDF
+                </button>
+                <button id="closeExportModal" class="btn-secondary">Close</button>
             </div>
         </div>
     </div>
